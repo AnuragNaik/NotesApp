@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">NotesApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_registeration">Registeration</string>
+    <string name="string_enter_email">Enter E-mail Id</string>
+    <string name="string_enter_profile_name">Enter Profile Name</string>
+</resources>
