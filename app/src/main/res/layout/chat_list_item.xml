@@ -8,7 +8,7 @@
     android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
-        android:layout_width="248dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/box">
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/common_google_signin_btn_text_dark_focused"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:textIsSelectable="true"
@@ -30,7 +30,7 @@
             android:layout_gravity="right"
             android:textColor="#3e2b2b"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="10dp"
+            android:textSize="10sp"
             android:text="12:21:6645"
             android:textStyle="normal" />
 

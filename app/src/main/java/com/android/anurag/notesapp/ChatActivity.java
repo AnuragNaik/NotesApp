@@ -33,13 +33,14 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     private String profileId, profileName, profileEmail;
     private GcmUtil gcmUtil;
     String TAG="mainActivity";
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         Log.d(TAG, "Common.PROFILE_ID= " + Common.PROFILE_ID);
         Log.d("MessagesFragment", "ChatActivity()" );
-		//got this profile Id (which is just index _id field in DB)  from intent.. Since this activity launched by clicking the contact in main activity
+		//got this profile Id (which is just index _id field in DB)  from intent. Since this activity launched by clicking the contact in main activity
         profileId = getIntent().getStringExtra(Common.PROFILE_ID);
 
         msgEdit = (EditText) findViewById(R.id.msg_edit);//Entered Message
@@ -53,7 +54,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             }
         });
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = this.getActionBar();
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -92,11 +93,11 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
                 String msg = "";
                 try {
                     ServerUtilities SU= new ServerUtilities();
-                    SU.send(txt, profileEmail);
+                    SU.send(txt, getProfileEmail());
 
                     ContentValues values = new ContentValues(2);
                     values.put(DataProvider.COL_MSG, txt);
-                    values.put(DataProvider.COL_TO, profileEmail);
+                    values.put(DataProvider.COL_TO, getProfileEmail());
                     getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
 
                 } catch (IOException ex) {

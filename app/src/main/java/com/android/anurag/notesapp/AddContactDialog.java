@@ -37,7 +37,7 @@ public class AddContactDialog extends DialogFragment {
             @Override
             public void onShow(DialogInterface dialog) {
                 Button okBtn = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                okBtn.setOnClickListener(new View.OnClickListener() {
+                okBtn.setOnClickListener(new View.OnClickListener() { 
 
                     @Override
                     public void onClick(View v) {

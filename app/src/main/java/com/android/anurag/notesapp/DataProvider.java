@@ -63,7 +63,6 @@ public class DataProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
        dbHelper= new DbHelper(getContext());
 
-
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
        // Log.d(TAG, "Uri : " + uri + ", projection " + projection.length );

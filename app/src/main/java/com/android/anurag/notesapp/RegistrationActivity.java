@@ -24,6 +24,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
         GcmUtil gcmUtil= new GcmUtil(this);
         gcmUtil.register(this, mobile, name);
+        editText1.setText("");
+        editText2.setText("");
      }
 
 }

@@ -48,6 +48,11 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                 new int[]{R.id.text1, R.id.text2},
                 0);
 
+		/**public abstract boolean setViewValue (View view, Cursor cursor, int columnIndex)
+		  * Binds the Cursor column defined by the specified index to the specified view. 
+		  * When binding is handled by this ViewBinder, this method must return true. 
+		  * If this method returns false, SimpleCursorAdapter will attempts to handle the binding on its own.
+		*/
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
 
             @Override
@@ -71,14 +76,18 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
             }
         });
         setListAdapter(adapter);
+
         Log.d(TAG, "onCreate() finished...");
     }
 
+	/** To delete or to take any action on a particular message we need to find reference to the message in our database.
+	 * 		This method finds ID of message and tasks can be performed on message accordingly.
+	 */
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Log.i(TAG, "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....");
-      //  Toast.makeText(getActivity(), "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....",Toast.LENGTH_LONG ).show();
+      //Toast.makeText(getActivity(), "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....",Toast.LENGTH_LONG ).show();
     }
 
     @Override
@@ -86,11 +95,12 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         super.onActivityCreated(savedInstanceState);
         Log.d(TAG, "onActivityCreated()");
         Bundle args = new Bundle();
-        Log.d(TAG, "onActivityCreated() and mListener.getProfileEmail()="+mListener.getProfileEmail());
+        Log.d(TAG, "onActivityCreated() and mListener.getProfileEmail()=" + mListener.getProfileEmail());
         args.putString(DataProvider.COL_EMAIL, mListener.getProfileEmail());
         getLoaderManager().initLoader(1, args, this);
         Log.d(TAG, "onActivityCreated() finish..");
         Log.d(TAG, args.getString(DataProvider.COL_EMAIL));
+
     }
 
     @Override
@@ -120,6 +130,8 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         Log.d(TAG, "onLoadFinished()");
         adapter.swapCursor(data);
         Log.d(TAG, "onLoadFinished() finish..");
+      //  getListView().smoothScrollToPosition(adapter.getCount() - 1); //this will scroll down smoothly
+        getListView().setSelection(adapter.getCount() - 1);  //setSelection(position) will directly take to the position specified
     }
 
     @Override

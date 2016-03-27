@@ -75,8 +75,6 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 					c.close();
 				}
 
-
-
                 //contact not found
 				if (contactName == null) return;
 				ContentValues values = new ContentValues(2);
@@ -84,14 +82,15 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 				values.put(DataProvider.COL_FROM, from);
 				values.put(DataProvider.COL_TO, "");
 				cr.insert(DataProvider.CONTENT_URI_MESSAGES, values);
-
-				if ((!from.equals(Common.getCurrentChat()) && !to.equals(Common.getCurrentChat()))) {
+/* */
+				Log.d(TAG, "current chat= "+ Common.getCurrentChat());
+				if ((!from.equals(Common.getCurrentChat()) &&!to.equals(Common.getCurrentChat()))) {
 					if (Common.isNotify()) {
 						sendNotification(contactName + ": " + msg, true);
 						Intent intnt= new Intent(context, PopUp.class);
 						intnt.putExtra("msg",msg);
 						intnt.putExtra("from", from);
-						intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						intnt.setFlags(Intent																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		.FLAG_ACTIVITY_NEW_TASK);
 						context.startActivity(intnt);
 					}
 					incrementMessageCount(context, from, to);
@@ -113,11 +112,6 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 		// Create an InboxStyle notification
 		NotificationManager mNotificationManager =
 				(NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		String[] notice= new String[10];
-		notice[0]="ashwin:hii";
-		notice[1]="ashwin:kaisa hai tu";
-		notice[2]="aur bata";
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx)
                 .setAutoCancel(true)
