@@ -47,7 +47,7 @@
             android:name=".ChatActivity"
             android:label="Chat Window"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustResize|stateHidden">
 
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>

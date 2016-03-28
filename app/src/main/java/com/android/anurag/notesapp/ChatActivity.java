@@ -65,6 +65,8 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             Common.setCurrentChat(profileEmail);
             actionBar.setTitle(profileName);
         }
+        c.close();
+
       //  actionBar.setSubtitle("connecting ...");
 
         registerReceiver(registrationStatusReceiver, new IntentFilter(Common.ACTION_REGISTER));

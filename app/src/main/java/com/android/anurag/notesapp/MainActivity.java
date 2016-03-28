@@ -1,5 +1,6 @@
 package com.android.anurag.notesapp;
 
+import android.app.ActionBar;
 import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
@@ -50,11 +51,11 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 
-                switch(view.getId()) {
+                switch (view.getId()) {
                     case R.id.text2:
                         int count = cursor.getInt(columnIndex);
                         if (count > 0) {
-                            ((TextView)view).setText(String.format("%d new message%s", count, count==1 ? "" : "s"));
+                            ((TextView) view).setText(String.format("%d new message%s", count, count == 1 ? "" : "s"));
                             Log.i(TAG, "setView ActivityMain");
                         }
                         return true;
@@ -64,8 +65,8 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
         });
         setListAdapter(adapter);
 
-      //  ActionBar actionBar = getActionBar();
-        //actionBar.setDisplayShowTitleEnabled(false);
+        ActionBar actionBar = getActionBar();
+        //actionBar.setDisplayShowTitleEnabled(true);
         getLoaderManager().initLoader(0, null, this);
     }
 

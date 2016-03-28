@@ -6,4 +6,6 @@
     <string name="title_activity_registeration">Registeration</string>
     <string name="string_enter_email">Enter E-mail Id</string>
     <string name="string_enter_profile_name">Enter Profile Name</string>
+    <string name="hint_type_a_message">Type a message</string>
+    <string name="send_message">Send</string>
 </resources>

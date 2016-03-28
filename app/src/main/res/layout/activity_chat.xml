@@ -2,42 +2,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#b5c1a8"
     android:orientation="vertical"
-    android:background="#b5c1a8">
+    android:showDividers="none"
+    android:baselineAligned="false">
 
     <fragment
-        android:name="com.android.anurag.notesapp.MessagesFragment"
         android:id="@+id/msg_list"
+        android:name="com.android.anurag.notesapp.MessagesFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         tools:layout="@layout/chat_list_item" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:orientation="horizontal"
+        android:layout_marginBottom="5dp">
+
+        <EditText
+            android:id="@+id/msg_edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/hint_type_a_message"
+            android:paddingLeft="10dp"
+            android:inputType="textMultiLine|textCapSentences"
+            android:isScrollContainer="true"
+            android:lines="5"
+            android:maxLines="10"
+            android:minLines="1"
+            android:scrollbars="none"
+            android:textColor="#000000"
+            android:textColorHint="@color/common_plus_signin_btn_text_dark_disabled"
+            android:textCursorDrawable="@null"
+            android:background="#ffffff"
+            android:minHeight="50dp"
+            android:gravity="center_vertical"
+            android:layout_marginRight="3dp" />
 
         <Button
             android:id="@+id/send_btn"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:text="Send" />
+            android:layout_height="50dp"
+            android:text="@string/send_message"
+            android:background="#449261"
+            android:layout_marginRight="4dp"
+            android:layout_gravity="bottom"
+            android:nestedScrollingEnabled="true" />
 
-        <EditText
-            android:id="@+id/msg_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/colorPrimary"
-            android:layout_alignBottom="@+id/send_btn"
-            android:layout_toLeftOf="@+id/send_btn"
-            android:layout_toStartOf="@+id/send_btn"
-            android:inputType="text">
-
-        </EditText>
-    </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>

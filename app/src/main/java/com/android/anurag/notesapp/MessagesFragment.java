@@ -131,7 +131,10 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         adapter.swapCursor(data);
         Log.d(TAG, "onLoadFinished() finish..");
       //  getListView().smoothScrollToPosition(adapter.getCount() - 1); //this will scroll down smoothly
-        getListView().setSelection(adapter.getCount() - 1);  //setSelection(position) will directly take to the position specified
+        ListView l= getListView();
+       // l.setSelection(adapter.getCount() - 1);  //setSelection(position) will directly take to the position specified
+        l.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        l.setStackFromBottom(true);
     }
 
     @Override
