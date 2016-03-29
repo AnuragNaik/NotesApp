@@ -2,9 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#b5c1a8"
+    android:background="@drawable/chat_background"
     android:orientation="vertical"
     android:showDividers="none"
+    android:dividerHeight="0dp"
     android:baselineAligned="false">
 
     <fragment
@@ -51,7 +52,7 @@
             android:background="#449261"
             android:layout_marginRight="4dp"
             android:layout_gravity="bottom"
-            android:nestedScrollingEnabled="true" />
+           />
 
     </LinearLayout>
 

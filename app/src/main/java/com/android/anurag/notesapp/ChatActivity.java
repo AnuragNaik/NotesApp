@@ -7,12 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,6 +26,8 @@ import com.android.anurag.notesapp.gcm.GcmUtil;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Created by anurag on 24/2/16.
@@ -49,8 +55,12 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         sendBtn.setOnClickListener(new View.OnClickListener() {	//if Send button clicked
             @Override
             public void onClick(View v) {
-                send(msgEdit.getText().toString());			//send the message
-                msgEdit.setText(null);						//set the message field null in UI
+                if(isNetworkAvailable()){
+                    send(msgEdit.getText().toString());			//send the message
+                    msgEdit.setText(null);						//set the message field null in UI
+                }else{
+                    Toast.makeText(ChatActivity.this, "Check Internet Connection!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -71,6 +81,17 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
         registerReceiver(registrationStatusReceiver, new IntentFilter(Common.ACTION_REGISTER));
         gcmUtil = new GcmUtil(getApplicationContext());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -124,6 +145,30 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         super.onDestroy();
     }
 
+    public boolean hasActiveInternetConnection(Context context) {
+        if (isNetworkAvailable()) {
+            try {
+                HttpURLConnection urlc = (HttpURLConnection) (new URL("http://www.google.com").openConnection());
+                urlc.setRequestProperty("User-Agent", "Test");
+                urlc.setRequestProperty("Connection", "close");
+                urlc.setConnectTimeout(1500);
+                urlc.connect();
+                return (urlc.getResponseCode() == 200);
+            } catch (IOException e) {
+                Log.e(TAG, "Error checking internet connection", e);
+            }
+        } else {
+            Log.d(TAG, "No network available!");
+        }
+        return false;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     private BroadcastReceiver registrationStatusReceiver = new  BroadcastReceiver() {
 

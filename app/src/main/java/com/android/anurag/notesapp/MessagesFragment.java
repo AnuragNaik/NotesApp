@@ -147,4 +147,30 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         String getProfileEmail();
     }
 
+
 }
+
+/*
+    Compare getLastVisiblePosition() with getCount() in a Runnable
+    to see if the entire ListView fits on the screen as soon as it has been drawn.
+    You should also check to see if the last visible row fits entirely on the screen.
+
+    Create the Runnable:
+
+    ListView listView;
+    Runnable fitsOnScreen = new Runnable() {
+        @Override
+        public void run() {
+            int last = listView.getLastVisiblePosition();
+            if(last == listView.getCount() - 1 && listView.getChildAt(last).getBottom() <= listView.getHeight()) {
+                // It fits!
+            }
+            else {
+                // It doesn't fit...
+            }
+        }
+    };
+
+    In onCreate() queue your Runnable in the ListView's Handler:
+        listView.post(fitsOnScreen);
+ */
