@@ -61,7 +61,7 @@ public class AddContactDialog extends DialogFragment {
         return alert;
     }
 
-    private boolean isEmailValid(CharSequence email) {
+    public boolean isEmailValid(CharSequence email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 

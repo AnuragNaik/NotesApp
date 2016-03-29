@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.anurag.notesapp.Common;
 import com.android.anurag.notesapp.MainActivity;
@@ -48,8 +49,9 @@ public class GcmUtil {
     }
     
     public boolean register(Activity activity, String mobile, String name) {
-    	Log.i("register", "register");
+        Log.i("register", "register");
         mobileNumber= mobile;
+
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
         if (checkPlayServices(activity)) {
             gcm = GoogleCloudMessaging.getInstance(context);
@@ -143,10 +145,12 @@ public class GcmUtil {
     private void registerInBackground(final com.android.anurag.notesapp.gcm.GcmListener listener) {
     	registrationTask = new AsyncTask<Void, Void, Boolean>() {
     		String msg = "";
-    		
+
+
             @Override
             protected Boolean doInBackground(Void... params) {
-	            long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+
+                long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
 	            for (int i = 1; i <= MAX_ATTEMPTS; i++) {
 	            	if (isCancelled()) break; 
 	            	
@@ -170,14 +174,16 @@ public class GcmUtil {
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString(PROPERTY_CHAT_ID, mobileNumber);
                             editor.apply();
+                            Toast.makeText(context,"Registered Successfully!", Toast.LENGTH_LONG ).show();
                             Intent intnt= new Intent(context, MainActivity.class);
-                            intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             context.startActivity(intnt);
 	                	}
 	                    
 	                } catch (IOException ex) {
 	                	Log.e("IOException", ex.getMessage());
 	                    msg = "Error :" + ex.getMessage();
+                         publishProgress();
 	                    // If there is an error, don't just keep trying to register.
 	                    // Require the user to click a button again, or perform
 	                    // exponential back-off.
@@ -200,6 +206,13 @@ public class GcmUtil {
             }
 
             @Override
+            protected void onProgressUpdate(Void... values) {
+                super.onProgressUpdate(values);
+                Toast.makeText(context, "Make sure you have internet connection", Toast.LENGTH_LONG).show();
+            }
+
+
+            @Override
 			protected void onCancelled() {
 				super.onCancelled();
                 if (listener != null) {
@@ -216,6 +229,8 @@ public class GcmUtil {
                 }
                 registrationTask = null;
             }
+
+
         }.execute(null, null, null);
     }
 
@@ -248,5 +263,6 @@ public class GcmUtil {
 		if (gcm != null) {
 			gcm.close();
 		}
-	}    
+	}
+
 }

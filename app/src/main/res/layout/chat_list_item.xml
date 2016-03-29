@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:weightSum="1"
     android:orientation="vertical"
-    android:background="#b5c1a8"
     android:descendantFocusability="blocksDescendants">
 
     <LinearLayout

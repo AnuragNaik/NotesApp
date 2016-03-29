@@ -21,7 +21,6 @@ import android.util.Log;
 import com.android.anurag.notesapp.Common;
 import com.android.anurag.notesapp.DataProvider;
 import com.android.anurag.notesapp.MainActivity;
-import com.android.anurag.notesapp.PopUp;
 import com.android.anurag.notesapp.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -58,26 +57,27 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 				from = intent.getStringExtra(Common.FROM);
 				to = intent.getStringExtra(Common.TO);
 
-				contactName=getContactIfAvailable(from, context);
+
 				Log.i(TAG, "msg= " + msg + "  from=" + from + "..." + " to: " + to + "...");
 
-				if(contactName == null){
-					insertContactIntoDatabase(context, contactName);
+				if(getContactIfAvailable(from, context)==null){
+					insertContactIntoDatabase(context, from);
+					Log.i(TAG,"inserting profile data into database");
 				}
 
 				insertMessageIntoDatabase(msg,from);
-
+				contactName=from;
 				Log.d(TAG, "current chat= "+ Common.getCurrentChat());
 				if ((!from.equals(Common.getCurrentChat()) &&!to.equals(Common.getCurrentChat()))) {
 					if (Common.isNotify()) {
 						sendNotification(contactName + ": " + msg, true);
-						Intent intnt= new Intent(context, PopUp.class);
+					/*	Intent intnt= new Intent(context, PopUp.class);
 						intnt.putExtra("msg", msg);
 						intnt.putExtra("from", from);
 						intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intnt);
+                        context.startActivity(intnt);*/
 					}
-					incrementMessageCount(context, from, to);
+					//incrementMessageCount(context, from, to);
 				}
 			}
 			setResultCode(Activity.RESULT_OK);
@@ -94,22 +94,25 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 	 * @return contact number/null
 	 */
 	public String getContactIfAvailable(String mobileNumber, Context context){
-		Cursor c = context.getContentResolver().query(
+
+        Cursor c = context.getContentResolver().query(
                 DataProvider.CONTENT_URI_PROFILE,
                 new String[]{DataProvider.COL_NAME},
                 DataProvider.COL_EMAIL + " = ?",
                 new String[]{mobileNumber},
 				null);
 
-		if (c != null) {
+		if (c != null && c.getCount()>0) {
 			if (c.moveToFirst()) {
 				mobileNumber = c.getString(0);
 				Log.i(TAG, "contactName: "+mobileNumber);
 			}
 			c.close();
 			return mobileNumber;
+		}else {
+            Log.i(TAG, "contact not found");
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -124,7 +127,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 			ContentValues values = new ContentValues(2);
 			values.put(DataProvider.COL_NAME, name);
 			values.put(DataProvider.COL_EMAIL, contact);
-			ctx.getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
+			context.getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
 		} catch (SQLException sqle) {
 			Log.e(TAG, sqle+": Inserting in databse failed");
 		}

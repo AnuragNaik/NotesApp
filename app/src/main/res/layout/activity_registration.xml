@@ -1,11 +1,10 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_weight="1"
     android:orientation="vertical"
     tools:context=".RegistrationActivity"
-    android:background="#cacf9e">
+    android:background="@drawable/bg1">
 
     <EditText
         android:id="@+id/mobile_number"
@@ -14,6 +13,8 @@
         android:layout_marginTop="16dp"
         android:hint="@string/string_enter_email"
         android:inputType="textEmailAddress"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:gravity="center_horizontal"
         />
 
@@ -21,20 +22,21 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:hint="@string/string_enter_profile_name"
         android:inputType="text"
-        android:layout_below="@+id/mobile_number"
+        android:layout_marginTop="16dp"
         android:gravity="center_horizontal"/>
 
     <Button
         android:id="@+id/register_button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_marginTop="16dp"
         android:hint="@string/string_enter_profile_name"
         android:onClick="registration"
         android:text="Register"
         android:background="#b3cfb4" />
-</RelativeLayout>
+</LinearLayout>

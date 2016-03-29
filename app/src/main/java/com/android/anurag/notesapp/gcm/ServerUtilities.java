@@ -42,7 +42,7 @@ public final class ServerUtilities {
 
     private static final String TAG = "ServerUtilities";
 
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 2;
     private static final int BACKOFF_MILLI_SECONDS = 2000;
     private static final Random random = new Random();
 
