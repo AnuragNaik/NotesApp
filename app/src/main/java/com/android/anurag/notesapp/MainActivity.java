@@ -1,6 +1,5 @@
 package com.android.anurag.notesapp;
 
-import android.app.ActionBar;
 import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -64,18 +63,8 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
             }
         });
         setListAdapter(adapter);
-/*
-        Log.i(TAG, "updating data ");
 
-        ContentValues dataToInsert = new ContentValues(1);
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        dataToInsert.put(DataProvider.SENT, timeStamp);
-        String where= "_id=?";
-
-        this.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, "161"), dataToInsert, null, null);
-        Log.i(TAG, "data updated");
-*/
-        ActionBar actionBar = getActionBar();
+        //  ActionBar actionBar = getActionBar();
         //actionBar.setDisplayShowTitleEnabled(true);
         getLoaderManager().initLoader(0, null, this);
     }
