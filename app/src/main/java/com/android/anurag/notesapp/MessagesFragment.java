@@ -3,9 +3,12 @@ package com.android.anurag.notesapp;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,15 +16,21 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * Created by anurag on 24/2/16.
  */
 public class MessagesFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>  {
 
+    private DbHelper dbHelper;
+    private static SQLiteDatabase db;
     private OnFragmentInteractionListener mListener;
     private SimpleCursorAdapter adapter;
-    String TAG= "MessagesFragment";
+    static String TAG= "MessagesFragment";
 
     @Override
     public void onAttach(Activity activity) {
@@ -61,14 +70,29 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                 switch (view.getId()) {
                     case R.id.text1:
                         LinearLayout root = (LinearLayout) view.getParent().getParent();
+                        LinearLayout messageBox = (LinearLayout) view.getParent();
+                        TextView messageView=(TextView) messageBox.findViewById(R.id.message_status);
+                        if(cursor.getString(cursor.getColumnIndex(DataProvider.READ))!=null){
+                            messageView.setText("Read");
+                        }
+                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.DELIVERED))!=null){
+                            messageView.setText("Delivered");
+                        }
+                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.SENT))!=null){
+                           messageView.setText("Sent");
+                        }
+
                         if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {
                             Log.d(TAG, "setView Right..");
                             root.setGravity(Gravity.RIGHT);
                             root.setPadding(50, 10, 10, 10);
+                            messageBox.setBackgroundResource(R.drawable.box);
                         } else {
                             Log.d(TAG, "setView Left..");
                             root.setGravity(Gravity.LEFT);
                             root.setPadding(10, 10, 50, 10);
+                            messageBox.setBackgroundResource(R.drawable.boxleft);
+                            messageView.setText("");
                         }
                         break;
                 }
@@ -147,7 +171,24 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         String getProfileEmail();
     }
 
+    public void setAsSentInMessageTable(String messageId){
+        Log.i(TAG, "updating data ");
+/*
+        ContentValues values = new ContentValues(2);
+        values.put(DataProvider.COL_MSG, "msg");
+        values.put(DataProvider.COL_FROM, "anurag@gmail.com");
+        values.put(DataProvider.COL_TO, "");
+        getActivity().getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+  */      Log.i(TAG, "updating data ");
 
+        ContentValues dataToInsert = new ContentValues(1);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        dataToInsert.put(DataProvider.SENT, timeStamp);
+        String where= "_id=?";
+        String[] whereArgs=new String[] {String.valueOf(messageId)};
+        getActivity().getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, messageId), dataToInsert, null, null);
+        Log.i(TAG, "data updated");
+    }
 }
 
 /*

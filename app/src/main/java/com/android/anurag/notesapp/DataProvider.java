@@ -24,6 +24,9 @@ public class DataProvider extends ContentProvider {
     public static final String COL_FROM = "email";
     public static final String COL_TO = "email2";
     public static final String COL_AT = "at";
+    public static final String SENT="sent";
+    public static final String DELIVERED="delivered";
+    public static final String READ="read";
 
     public static final String TABLE_PROFILE = "profile";
     public static final String COL_NAME = "name";
@@ -130,6 +133,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        dbHelper= new DbHelper(getContext());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         int count;
@@ -154,21 +158,26 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        dbHelper= new DbHelper(getContext());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         int count;
         switch(uriMatcher.match(uri)) {
             case MESSAGES_ALLROWS:
             case PROFILE_ALLROWS:
+                Log.i(TAG,"inside update");
                 count = db.update(getTableName(uri), values, selection, selectionArgs);
                 break;
 
             case MESSAGES_SINGLE_ROW:
             case PROFILE_SINGLE_ROW:
+
                 count = db.update(getTableName(uri), values, "_id = ?", new String[]{uri.getLastPathSegment()});
                 break;
 
             default:
+                Log.i(TAG,"table name: "+getTableName(uri)+", id= "+uri.getLastPathSegment());
+                count = db.update(getTableName(uri), values, "_id = ?", new String[]{uri.getLastPathSegment()});
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
 
@@ -177,14 +186,18 @@ public class DataProvider extends ContentProvider {
     }
 
     private String getTableName(Uri uri){
+        Log.i(TAG,"uri: " +uri);
         switch(uriMatcher.match(uri)){
             case MESSAGES_SINGLE_ROW:
             case MESSAGES_ALLROWS:
+                Log.i(TAG, "returned table: "+TABLE_MESSAGES);
                 return TABLE_MESSAGES;
 
             case PROFILE_SINGLE_ROW:
             case PROFILE_ALLROWS:
+                Log.i(TAG, "returned table: "+TABLE_PROFILE);
                 return TABLE_PROFILE;
+
         }
         return null;
     }

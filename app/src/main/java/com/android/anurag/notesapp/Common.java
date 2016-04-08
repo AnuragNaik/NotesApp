@@ -26,6 +26,8 @@ public class Common extends Application {
     public static final String TO="to";
     public static final String MSG="msg";
     public static final String USER_NAME="mobile_no";
+    public static final String MSG_ID="msg_id";
+    public static final String ACK="ack";
 
     public static String[] email_arr;
     private static SharedPreferences prefs;

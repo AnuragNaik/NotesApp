@@ -3,15 +3,11 @@ package com.android.anurag.notesapp;
 import android.app.ActionBar;
 import android.app.ListActivity;
 import android.app.LoaderManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,7 +16,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.anurag.notesapp.gcm.GcmUtil;
 
@@ -31,8 +26,13 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Context context=this;
+        MessagesFragment m= new MessagesFragment();
 
-        registerReceiver(k, new IntentFilter("com.android.net.CONNECTIVITY_CHANGE"));
+        context.sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
+        context.sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
+
+
         GcmUtil gcmUtil= new GcmUtil(this);
         if(gcmUtil.getRegistrationId(this).equals("")){
             Intent i= new Intent(this, RegistrationActivity.class);
@@ -64,7 +64,17 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
             }
         });
         setListAdapter(adapter);
+/*
+        Log.i(TAG, "updating data ");
 
+        ContentValues dataToInsert = new ContentValues(1);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        dataToInsert.put(DataProvider.SENT, timeStamp);
+        String where= "_id=?";
+
+        this.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, "161"), dataToInsert, null, null);
+        Log.i(TAG, "data updated");
+*/
         ActionBar actionBar = getActionBar();
         //actionBar.setDisplayShowTitleEnabled(true);
         getLoaderManager().initLoader(0, null, this);
@@ -122,22 +132,4 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
         }
         return super.onOptionsItemSelected(item);
     }
-
-    BroadcastReceiver k= new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                Toast.makeText(context, "Broadcast received",Toast.LENGTH_SHORT).show();
-                NetworkInfo networkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-                if (networkInfo != null && networkInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED) {
-                    Log.d(TAG, "Internet YAY");
-                } else if (networkInfo != null && networkInfo.getDetailedState() == NetworkInfo.DetailedState.DISCONNECTED) {
-                    Log.d(TAG, "No internet :(");
-                }
-            }
-
-        }
-    };
-
 }

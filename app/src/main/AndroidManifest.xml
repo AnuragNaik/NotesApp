@@ -54,9 +54,9 @@
         </activity>
         
         <!-- suppress AndroidDomInspection -->
-        <!-- android:name="com.google.android.gms.gcm.GcmReceiver"-->
-        <receiver
-            android:name="com.android.anurag.notesapp.gcm.GcmBroadcastReceiver"
+        <!--android:name="com.android.anurag.notesapp.gcm.GcmBroadcastReceiver -->
+         <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -102,7 +102,7 @@
             </intent-filter>
         </service>
 -->
-<!--
+
         <service
             android:name="com.android.anurag.notesapp.gcm.GcmIntentService"
             android:exported="false" >
@@ -110,7 +110,7 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
--->
+
     </application>
 
 </manifest>

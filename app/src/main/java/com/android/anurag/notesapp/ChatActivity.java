@@ -39,10 +39,10 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     private String profileId, profileName, profileEmail;
     private GcmUtil gcmUtil;
     String TAG="mainActivity";
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_chat);
         Log.d(TAG, "Common.PROFILE_ID= " + Common.PROFILE_ID);
         Log.d("MessagesFragment", "ChatActivity()" );
@@ -55,7 +55,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         sendBtn.setOnClickListener(new View.OnClickListener() {	//if Send button clicked
             @Override
             public void onClick(View v) {
-                if(isNetworkAvailable()){
+                if(isOnline()){
                     send(msgEdit.getText().toString());			//send the message
                     msgEdit.setText(null);						//set the message field null in UI
                 }else{
@@ -115,17 +115,38 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             protected String doInBackground(Void... params) {
                 String msg = "";
                 try {
-                    ServerUtilities SU= new ServerUtilities();
-                    SU.send(txt, getProfileEmail());
 
-                    ContentValues values = new ContentValues(2);
+                    /**
+                     * Insert the message in messages table
+                     */
+
+                    ContentValues values = new ContentValues(3);
                     values.put(DataProvider.COL_MSG, txt);
                     values.put(DataProvider.COL_TO, getProfileEmail());
-                    getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+
+                    /**
+                     * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id
+                     * so we need to fetch lastPathSegment() to get id from resultUri
+                     */
+
+                    Uri resultUri=getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+                    String id= resultUri.getLastPathSegment();
+                    Log.d(TAG, "insertUri= "+resultUri+" ,id= " +id);
+
+                    /**
+                     * Now sending message Id with payload to track the delivery and status of message
+                     */
+
+                    ServerUtilities SU= new ServerUtilities();
+                    SU.send(getApplicationContext(),txt, getProfileEmail(), id);
 
                 } catch (IOException ex) {
                     msg = "Message could not be sent";
                 }
+                /**
+                 * this 'msg' will be returned to onPostExecute(String args)
+                 * returning the msg
+                 */
                 return msg;
             }
 
@@ -187,5 +208,22 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             }
         }
     };
+
+    public boolean isOnline() {
+
+        Runtime runtime = Runtime.getRuntime();
+        try {
+
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
+    }
+
+
 }
 

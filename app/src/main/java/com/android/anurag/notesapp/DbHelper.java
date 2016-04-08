@@ -21,12 +21,15 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
 
         //getting tables  created and initialized
-        String CREATE_MSG_TABLE= "create table messages "
-                + "(_id integer primary key autoincrement," +
+        String CREATE_MSG_TABLE= "create table messages " +
+                "(_id integer primary key autoincrement," +
                 " msg text," +
                 " email text," +
                 " email2 text," +
-                " at datetime default current_timestamp)" +
+                " at datetime default current_timestamp," +
+                " sent datetime default null," +
+                " delivered datetime default null," +
+                " read datetime default null)" +
                 ";";
 
         String CREATE_PROFILE_TABLE="create table profile " +

@@ -15,10 +15,14 @@
  */
 package com.android.anurag.notesapp.gcm;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.anurag.notesapp.Common;
+import com.android.anurag.notesapp.DataProvider;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +36,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 
@@ -42,17 +48,18 @@ public final class ServerUtilities {
 
     private static final String TAG = "ServerUtilities";
 
-    private static final int MAX_ATTEMPTS = 2;
+    private static final int MAX_ATTEMPTS = 10;
     private static final int BACKOFF_MILLI_SECONDS = 2000;
     private static final Random random = new Random();
 
     public String UrlToSendMsg="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/send.php";
     public String UrlToRegister="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/register.php";
     public String UrlToUnRegister="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/unregister.php";
+    public String UrlToSendDeliveryReport="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/ack.php";
     /**
      * Register this account/device pair within the server.
      */
-    public String register(final String mobile, final String regId) {
+    public String register(Context context, final String mobile, final String regId) {
         Log.i(TAG, "registering device (regId = " + regId + ")");
 
         // Once GCM returns a registration id, we need to register it in the
@@ -68,7 +75,7 @@ public final class ServerUtilities {
             e.printStackTrace();
         }
         if (post_dict.length() > 0) {
-            new SendJsonDataToServer().execute(String.valueOf(post_dict),UrlToRegister);
+            new SendJsonDataToServer(context).execute(String.valueOf(post_dict),UrlToRegister);
         }
         return mobile;
     }
@@ -86,28 +93,53 @@ public final class ServerUtilities {
             e.printStackTrace();
         }
         if (post_dict.length() > 0) {
-            new SendJsonDataToServer().execute(String.valueOf(post_dict),UrlToUnRegister);
+           // new SendJsonDataToServer().execute(String.valueOf(post_dict),UrlToUnRegister);
         }
     }
 
-    public  void send(String msg, String to) throws IOException{
+    public  void send(Context context,String msg, String to, String messageId) throws IOException{
         JSONObject post_dict = new JSONObject();
 
         try {
             Log.i(TAG,"chat id= "+Common.getChatId());
-            post_dict.put(Common.TO , to);
+            post_dict.put(Common.TO, to);
             post_dict.put(Common.FROM, Common.getChatId());
             post_dict.put(Common.MSG, msg);
-
+            post_dict.put(Common.MSG_ID, messageId);
+            post_dict.put(Common.ACK,"SENT");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         if (post_dict.length() > 0) {
-            new SendJsonDataToServer().execute(String.valueOf(post_dict), UrlToSendMsg);
+            new SendJsonDataToServer(context).execute(String.valueOf(post_dict), UrlToSendMsg);
+        }
+
+    }
+
+    public void sendDeliveryReport(Context context, String to, String messageId) throws IOException{
+        JSONObject post_dict = new JSONObject();
+
+        try {
+            post_dict.put(Common.TO, to);
+            post_dict.put(Common.MSG_ID, messageId);
+            post_dict.put(Common.ACK,"DELIVERY_REPORT");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (post_dict.length() > 0) {
+            new SendJsonDataToServer(context).execute(String.valueOf(post_dict), UrlToSendDeliveryReport);
         }
     }
 
     static class SendJsonDataToServer extends AsyncTask<String,String,String> {
+         private Context mContext;
+
+        public SendJsonDataToServer(Context context){
+            mContext=context;
+        }
+
         @Override
         protected String doInBackground(String... params) {
             String JsonResponse = null;
@@ -117,11 +149,12 @@ public final class ServerUtilities {
             BufferedReader reader = null;
             long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
             for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-                Log.d(TAG, "Attempt #" + i + " to send");
+                Log.i(TAG, "Attempt #" + i + " to send");
                 try {
                     URL url = new URL(Url);
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setDoOutput(true);
+                    urlConnection.setReadTimeout(4000);
                     // is output buffer writter
                     Log.i(TAG, "trying to connect...");
                     urlConnection.setRequestMethod("POST");
@@ -146,7 +179,7 @@ public final class ServerUtilities {
 
                     String inputLine;
                     while ((inputLine = reader.readLine()) != null)
-                        buffer.append(inputLine + "\n");
+                        buffer.append(inputLine);
                     if (buffer.length() == 0) {
                         // Stream was empty. No point in parsing.
                         return null;
@@ -156,6 +189,7 @@ public final class ServerUtilities {
                     //     Toast.makeText(getApplicationContext(),"Json Response="+JsonResponse,Toast.LENGTH_LONG).show();
                     Log.i(TAG, JsonResponse);
                     //send to post execute
+                    publishProgress(JsonResponse);
                     return JsonResponse;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -189,7 +223,28 @@ public final class ServerUtilities {
         }
 
         @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+           String JsonResponse= values[0];
+            Log.i(TAG, "JsonReasponse: " + JsonResponse);
+            if(!JsonResponse.equals("1")) {
+                Log.i(TAG, "updating data ");
+                ContentValues dataToInsert = new ContentValues(1);
+
+                SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+                Date now = new Date();
+                String strDate = sdfDate.format(now);
+                Log.i(TAG,strDate );
+                dataToInsert.put(DataProvider.SENT, strDate);
+                mContext.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, JsonResponse), dataToInsert, null, null);
+
+                Log.i(TAG, "data updated");
+            }
+        }
+
+        @Override
         protected void onPostExecute(String s) {
+           // (new MessagesFragment()).setAsSentInMessageTable(s);
         }
     }
 }

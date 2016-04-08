@@ -157,7 +157,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 
 	}
 
-	public static int ctr=1;
+//	public static int ctr=1;
 	private void sendNotification(String text, boolean launchApp) {
 	//	NotificationManagerCompat mNotificationManager = (NotificationManagerCompat) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -174,8 +174,8 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
                 .setContentTitle(ctx.getString(R.string.app_name))
                 .setStyle(new NotificationCompat.InboxStyle()
 						.addLine(text)
-						.setBigContentTitle(ctr + " new Messages")
-						.setSummaryText(ctr + " new Messages"))
+						.setBigContentTitle(/*ctr + */" new Messages")
+						.setSummaryText(/*ctr + */" new Messages"))
                 .setGroup(GROUP_KEY)
                 .setGroupSummary(true)
                 .setSound(Uri.parse(Common.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);

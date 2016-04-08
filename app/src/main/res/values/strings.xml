@@ -8,4 +8,5 @@
     <string name="string_enter_profile_name">Enter Profile Name</string>
     <string name="hint_type_a_message">Type a message</string>
     <string name="send_message">Send</string>
+    <string name="google_app_id">706291839426</string>
 </resources>

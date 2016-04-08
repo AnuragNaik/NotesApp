@@ -146,7 +146,6 @@ public class GcmUtil {
     	registrationTask = new AsyncTask<Void, Void, Boolean>() {
     		String msg = "";
 
-
             @Override
             protected Boolean doInBackground(Void... params) {
 
@@ -164,7 +163,7 @@ public class GcmUtil {
                         Log.d(TAG, "Device registered, registration ID=" + regid);
                         // You should send the registration ID to your server over HTTP, so it
 	                    // can use GCM/HTTP or CCS to send messages to your app.
-	                	String chatId = new com.android.anurag.notesapp.gcm.ServerUtilities().register(mobileNumber, regid);
+	                	String chatId = new com.android.anurag.notesapp.gcm.ServerUtilities().register(context,mobileNumber, regid);
 
                         if (!TextUtils.isEmpty(chatId)) {
 	                	    storeRegistrationId(context, regid);
@@ -174,7 +173,7 @@ public class GcmUtil {
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString(PROPERTY_CHAT_ID, mobileNumber);
                             editor.apply();
-                            Toast.makeText(context,"Registered Successfully!", Toast.LENGTH_LONG ).show();
+                           // Toast.makeText(context,"Registered Successfully!", Toast.LENGTH_LONG ).show();
                             Intent intnt= new Intent(context, MainActivity.class);
                             intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             context.startActivity(intnt);

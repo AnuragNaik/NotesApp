@@ -34,7 +34,6 @@
         android:layout_toEndOf="@+id/avatar"
         android:layout_toRightOf="@+id/avatar"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#402727"
-         />
+        android:textColor="#402727" />
 
 </RelativeLayout>
