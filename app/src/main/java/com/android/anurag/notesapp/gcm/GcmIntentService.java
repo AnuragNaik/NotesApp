@@ -32,6 +32,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.anurag.notesapp.AlertDialog;
 import com.android.anurag.notesapp.Common;
 import com.android.anurag.notesapp.DataProvider;
 import com.android.anurag.notesapp.MainActivity;
@@ -50,12 +51,43 @@ import java.util.Date;
  * wake lock.
  */
 public class GcmIntentService extends IntentService {
+
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
 
     private Context ctx;
     private ContentResolver cr;
+    private String msg;
+    private String to;
+    private String from;
+    private String contactName;
+    private String msgId;
+    private String ack;
+
+    public void setAck(String ack) {
+        this.ack = ack;
+    }
+
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -67,11 +99,10 @@ public class GcmIntentService extends IntentService {
         ctx = this;
         Context context= ctx;
         cr = context.getContentResolver();
-        String msg, to, from, contactName, msgId, ack;
+
         PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.acquire();
-
 
         try {
             GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
@@ -79,79 +110,82 @@ public class GcmIntentService extends IntentService {
             String messageType = gcm.getMessageType(intent);
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 sendNotification("Send error", false);
-
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("Deleted messages on server", false);
-
             } else {
-
-                to = intent.getStringExtra(Common.TO);
-                msgId = intent.getStringExtra(Common.MSG_ID);
-                ack = intent.getStringExtra(Common.ACK);
-
-                Log.i(TAG, "ack: "+ack+" msgId: "+msgId+ " to: " + to + "...");
+                setTo(intent.getStringExtra(Common.TO));
+                setMsgId(intent.getStringExtra(Common.MSG_ID));
+                setAck(intent.getStringExtra(Common.ACK));
+                Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
                 if (ack.equals("SENT")) {
+                    //message is received from other client
+                    setMsg(intent.getStringExtra(Common.MSG));
+                    setFrom(intent.getStringExtra(Common.FROM));
 
-                    msg = intent.getStringExtra(Common.MSG);
-                    from = intent.getStringExtra(Common.FROM);
-
-                    try{
+                    try {
+                        //send delivery report to the client
                         serverUtilities.sendDeliveryReport(ctx, from, msgId);
-                    }
-                    catch(IOException e){
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
 
+                    /**
+                    check if contact is already there in your database or not
+                    if(there){
+                        insert message to the contact
+                    }
+                    else{
+                        create new contact and add to database and then add the message
+                    }
+                     */
                     if (getContactIfAvailable(from, context) == null) {
                         insertContactIntoDatabase(context, from);
                         Log.i(TAG, "inserting profile data into database");
                     }
 
                     insertMessageIntoDatabase(msg, from);
-                    contactName = from;
+                    setContactName(from);
                     Log.d(TAG, "current chat= " + Common.getCurrentChat());
-                    if ((!from.equals(Common.getCurrentChat()) && !to.equals(Common.getCurrentChat()))) {
+                    if (!(from.equals(Common.getCurrentChat()) && !to.equals(Common.getCurrentChat()))) {
+
                         if (Common.isNotify()) {
                             sendNotification(contactName + ": " + msg, true);
-					/*	Intent intnt= new Intent(context, PopUp.class);
-						intnt.putExtra("msg", msg);
-						intnt.putExtra("from", from);
-						intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intnt);*/
+                            showNotificationPopUp(from, msg);
+                            incrementMessageCount(context, from, to);
                         }
-                        incrementMessageCount(context, from, to);
                     }
+
+                } else if (ack.equals("DELIVERY_REPORT")) {
+                        //Delivery report
+                        Log.i(TAG, "delivery Report inserting in database");
+                        ContentValues contentValues = new ContentValues(1);
+                        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+                        Date now = new Date();
+                        String strDate = sdfDate.format(now);
+                        contentValues.put(DataProvider.COL_DELIVERED, strDate);
+                        ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
+                        Log.i(TAG, "Delivery Status updated in database ");
+                } else if (ack.equals("READ")) {
+                    //TODO implement Read ack
                 }
-                else if(ack.equals("DELIVERY_REPORT")){
-                    //Delivery report
-                    Log.i(TAG, "delivery Report inserting in database");
-                    ContentValues contentValues= new ContentValues(1);
-                    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
-                    Date now = new Date();
-                    String strDate = sdfDate.format(now);
-                    contentValues.put(DataProvider.DELIVERED, strDate);
-                    ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
-                    Log.i(TAG, "Delivery Status updated in database ");
-                }
-                else if(ack.equals("READ")){
-                    //Delivery report
-                    Log.i(TAG, "delivery Report inserting in database");
-                    ContentValues contentValues= new ContentValues(1);
-                    SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
-                    Date now = new Date();
-                    String strDate = sdfDate.format(now);
-                    contentValues.put(DataProvider.READ, strDate);
-                    ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
-                    Log.i(TAG, "Delivery Status updated in database ");
-                }
-                //setResultCode(Activity.RESULT_OK);
             }
-        }finally{
+        }
+        finally{
             mWakeLock.release();
         }
-
-
     }
+
+    /**
+     * \brief shows notification popup
+     */
+    public void showNotificationPopUp(String from, String msg){
+        Intent dialogIntent= new Intent(ctx, AlertDialog.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        dialogIntent.putExtra("sender_name", from);
+        dialogIntent.putExtra("msg", msg);
+        dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(dialogIntent);
+    }
+
     /**
      * Query Database for contact Availability
      * @param context context variable
@@ -162,8 +196,8 @@ public class GcmIntentService extends IntentService {
 
         Cursor c = context.getContentResolver().query(
                 DataProvider.CONTENT_URI_PROFILE,
-                new String[]{DataProvider.COL_NAME},
-                DataProvider.COL_EMAIL + " = ?",
+                new String[]{DataProvider.COL_USER_NAME},
+                DataProvider.COL_USER_ID + " = ?",
                 new String[]{mobileNumber},
                 null);
 
@@ -190,8 +224,8 @@ public class GcmIntentService extends IntentService {
         String name=getContactNameFromConactNumber(contact);
         try {
             ContentValues values = new ContentValues(2);
-            values.put(DataProvider.COL_NAME, name);
-            values.put(DataProvider.COL_EMAIL, contact);
+            values.put(DataProvider.COL_USER_NAME, name);
+            values.put(DataProvider.COL_USER_ID, contact);
             context.getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
         } catch (SQLException sqle) {
             Log.e(TAG, sqle+": Inserting in databse failed");
@@ -225,7 +259,7 @@ public class GcmIntentService extends IntentService {
     //	public static int ctr=1;
     private void sendNotification(String text, boolean launchApp) {
         //	NotificationManagerCompat mNotificationManager = (NotificationManagerCompat) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-
+        Log.i(TAG, "notification");
         String GROUP_KEY="key";
         //	final  String GROUP_KEY_EMAILS = "group_key_emails";
 
@@ -249,7 +283,7 @@ public class GcmIntentService extends IntentService {
         //	Random rn= new Random();
         //	int notificationId= rn.nextInt();
         int notificationId=1;
-        //	mNotificationManager.notify(notificationId, mBuilder.build());
+        	//mNotificationManager.notify(notificationId, mBuilder.build());
 
 
         if (!TextUtils.isEmpty(Common.getRingtone())) {
@@ -280,10 +314,10 @@ public class GcmIntentService extends IntentService {
             chatId = from;
         }
 
-        String selection = DataProvider.COL_EMAIL+" = ?";
+        String selection = DataProvider.COL_USER_ID+" = ?";
         String[] selectionArgs = new String[]{chatId};
         Cursor c = cr.query(DataProvider.CONTENT_URI_PROFILE,
-                new String[]{DataProvider.COL_COUNT},
+                new String[]{DataProvider.COL_MSG_COUNT},
                 selection,
                 selectionArgs,
                 null);
@@ -293,10 +327,12 @@ public class GcmIntentService extends IntentService {
                 int count = c.getInt(0);
 
                 ContentValues cv = new ContentValues(1);
-                cv.put(DataProvider.COL_COUNT, count+1);
+                cv.put(DataProvider.COL_MSG_COUNT, count+1);
                 cr.update(DataProvider.CONTENT_URI_PROFILE, cv, selection, selectionArgs);
             }
             c.close();
         }
     }
+
 }
+

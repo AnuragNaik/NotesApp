@@ -25,6 +25,9 @@ import android.widget.Toast;
 import com.android.anurag.notesapp.gcm.GcmUtil;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -38,7 +41,13 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     private Button sendBtn;
     private String profileId, profileName, profileEmail;
     private GcmUtil gcmUtil;
-    String TAG="mainActivity";
+    private  ServerUtilities SU;
+    String TAG="ChatActivity";
+
+    public ChatActivity(){
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +55,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         setContentView(R.layout.activity_chat);
         Log.d(TAG, "Common.PROFILE_ID= " + Common.PROFILE_ID);
         Log.d("MessagesFragment", "ChatActivity()" );
-		//got this profile Id (which is just index _id field in DB)  from intent. Since this activity launched by clicking the contact in main activity
+        //got this profile Id (which is just index _id field in DB)  from intent. Since this activity launched by clicking the contact in main activity
         profileId = getIntent().getStringExtra(Common.PROFILE_ID);
 
         msgEdit = (EditText) findViewById(R.id.msg_edit);//Entered Message
@@ -55,7 +64,8 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         sendBtn.setOnClickListener(new View.OnClickListener() {	//if Send button clicked
             @Override
             public void onClick(View v) {
-                if(isOnline()){
+                if(/*isOnline() && */!msgEdit.getText().toString().equals("") ){
+                   Log.d(TAG, "Sending msg");
                     send(msgEdit.getText().toString());			//send the message
                     msgEdit.setText(null);						//set the message field null in UI
                 }else{
@@ -70,14 +80,14 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
         Cursor c = getContentResolver().query(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), null, null, null, null);
         if (c.moveToFirst()) {
-            profileName = c.getString(c.getColumnIndex(DataProvider.COL_NAME));
-            profileEmail = c.getString(c.getColumnIndex(DataProvider.COL_EMAIL));
+            profileName = c.getString(c.getColumnIndex(DataProvider.COL_USER_NAME));
+            profileEmail = c.getString(c.getColumnIndex(DataProvider.COL_USER_ID));
             Common.setCurrentChat(profileEmail);
             actionBar.setTitle(profileName);
         }
         c.close();
 
-      //  actionBar.setSubtitle("connecting ...");
+        //  actionBar.setSubtitle("connecting ...");
 
         registerReceiver(registrationStatusReceiver, new IntentFilter(Common.ACTION_REGISTER));
         gcmUtil = new GcmUtil(getApplicationContext());
@@ -103,12 +113,12 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     protected void onPause() {
         //reset new messages count
         ContentValues values = new ContentValues(1);
-        values.put(DataProvider.COL_COUNT, 0);
+        values.put(DataProvider.COL_MSG_COUNT, 0);
         getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_PROFILE, profileId), values, null, null);
         super.onPause();
     }
 
-    private void send(final String txt) {
+    public void send(final String txt) {
 
         new AsyncTask<Void, Void, String>() {
             @Override
@@ -137,7 +147,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
                      * Now sending message Id with payload to track the delivery and status of message
                      */
 
-                    ServerUtilities SU= new ServerUtilities();
+                    SU= new ServerUtilities();
                     SU.send(getApplicationContext(),txt, getProfileEmail(), id);
 
                 } catch (IOException ex) {
@@ -152,9 +162,6 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
             @Override
             protected void onPostExecute(String msg) {
-                if (!TextUtils.isEmpty(msg)) {
-                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-                }
             }
         }.execute(null, null, null);
     }
@@ -164,31 +171,6 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         unregisterReceiver(registrationStatusReceiver);
         gcmUtil.cleanup();
         super.onDestroy();
-    }
-
-    public boolean hasActiveInternetConnection(Context context) {
-        if (isNetworkAvailable()) {
-            try {
-                HttpURLConnection urlc = (HttpURLConnection) (new URL("http://www.google.com").openConnection());
-                urlc.setRequestProperty("User-Agent", "Test");
-                urlc.setRequestProperty("Connection", "close");
-                urlc.setConnectTimeout(1500);
-                urlc.connect();
-                return (urlc.getResponseCode() == 200);
-            } catch (IOException e) {
-                Log.e(TAG, "Error checking internet connection", e);
-            }
-        } else {
-            Log.d(TAG, "No network available!");
-        }
-        return false;
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private BroadcastReceiver registrationStatusReceiver = new  BroadcastReceiver() {
@@ -224,6 +206,92 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         return false;
     }
 
+
+    public void sendFromDialog(final String txt, final String to) {
+
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+
+                    /**
+                     * Insert the message in messages table
+                     */
+
+                    ContentValues values = new ContentValues(3);
+                    values.put(DataProvider.COL_MSG, txt);
+                    values.put(DataProvider.COL_TO, to);
+
+                    /**
+                     * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id
+                     * so we need to fetch lastPathSegment() to get id from resultUri
+                     */
+
+                    Uri resultUri=getApplicationContext().getContentResolver().insert(DataProvider.CONTENT_URI_MESSAGES, values);
+                    String id= resultUri.getLastPathSegment();
+                    Log.d(TAG, "insertUri= "+resultUri+" ,id= " +id);
+
+                    /**
+                     * Now sending message Id with payload to track the delivery and status of message
+                     */
+
+                    SU= new ServerUtilities();
+                    SU.send(getApplicationContext(),txt, to, id);
+
+                } catch (IOException ex) {
+                    msg = "Message could not be sent";
+                }
+                /**
+                 * this 'msg' will be returned to onPostExecute(String args)
+                 * returning the msg
+                 */
+                return msg;
+            }
+
+            @Override
+            protected void onProgressUpdate(Void... values) {
+                super.onProgressUpdate(values);
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                if (!TextUtils.isEmpty(msg)) {
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                }
+            }
+        }.execute(null, null, null);
+    }
+
+    public void sendFromBackGround(final String message, final String to,final String msgID) {
+
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    /**
+                     * Now sending message Id with payload to track the delivery and status of message
+                     */
+                    SU= new ServerUtilities();
+                    String k= "k";
+                    SU.send(getApplicationContext(), message, to, msgID);
+
+                } catch (IOException ex) {
+                    msg = "Message could not be sent";
+                }
+                /**
+                 * this 'msg' will be returned to onPostExecute(String args)
+                 * returning the msg
+                 */
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+            }
+        }.execute(null, null, null);
+    }
 
 }
 

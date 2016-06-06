@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/chat_background"
+    android:background="@drawable/unnamed"
     android:orientation="vertical"
     android:showDividers="none"
     android:dividerHeight="0dp"

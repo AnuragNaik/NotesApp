@@ -97,8 +97,8 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 
         Cursor c = context.getContentResolver().query(
                 DataProvider.CONTENT_URI_PROFILE,
-                new String[]{DataProvider.COL_NAME},
-                DataProvider.COL_EMAIL + " = ?",
+                new String[]{DataProvider.COL_USER_NAME},
+                DataProvider.COL_USER_ID + " = ?",
                 new String[]{mobileNumber},
 				null);
 
@@ -125,8 +125,8 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 		String name=getContactNameFromConactNumber(contact);
 		try {
 			ContentValues values = new ContentValues(2);
-			values.put(DataProvider.COL_NAME, name);
-			values.put(DataProvider.COL_EMAIL, contact);
+			values.put(DataProvider.COL_USER_NAME, name);
+			values.put(DataProvider.COL_USER_ID, contact);
 			context.getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
 		} catch (SQLException sqle) {
 			Log.e(TAG, sqle+": Inserting in databse failed");
@@ -215,10 +215,10 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 			chatId = from;
 		}
 		
-		String selection = DataProvider.COL_EMAIL+" = ?";
+		String selection = DataProvider.COL_USER_ID+" = ?";
 		String[] selectionArgs = new String[]{chatId};
 		Cursor c = cr.query(DataProvider.CONTENT_URI_PROFILE, 
-				new String[]{DataProvider.COL_COUNT}, 
+				new String[]{DataProvider.COL_MSG_COUNT},
 				selection, 
 				selectionArgs, 
 				null);
@@ -228,7 +228,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 				int count = c.getInt(0);
 				
 				ContentValues cv = new ContentValues(1);
-				cv.put(DataProvider.COL_COUNT, count+1);
+				cv.put(DataProvider.COL_MSG_COUNT, count+1);
 				cr.update(DataProvider.CONTENT_URI_PROFILE, cv, selection, selectionArgs);
 			}
 			c.close();

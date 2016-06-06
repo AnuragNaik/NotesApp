@@ -24,14 +24,14 @@ public class DataProvider extends ContentProvider {
     public static final String COL_FROM = "email";
     public static final String COL_TO = "email2";
     public static final String COL_AT = "at";
-    public static final String SENT="sent";
-    public static final String DELIVERED="delivered";
-    public static final String READ="read";
+    public static final String COL_SENT="sent";
+    public static final String COL_DELIVERED="delivered";
+    public static final String COL_READ="read";
 
     public static final String TABLE_PROFILE = "profile";
-    public static final String COL_NAME = "name";
-    public static final String COL_EMAIL = "email";
-    public static final String COL_COUNT = "count";
+    public static final String COL_USER_NAME = "name";
+    public static final String COL_USER_ID = "email";
+    public static final String COL_MSG_COUNT = "count";
     public static final String COL_CHATID = "chatid";
 
     public static final Uri CONTENT_URI_MESSAGES = Uri.parse("content://com.android.anurag.notesapp.provider/messages");
@@ -85,15 +85,6 @@ public class DataProvider extends ContentProvider {
         }
 
         Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-     /*   if (c.moveToFirst()) {
-            do {
-                String msgg = c.getString(0);
-                String msggg = c.getString(1);
-                Log.d(TAG, "msgg=- " + msgg + "  msggg=  " + msggg);
-            } while (c.moveToNext());
-        }
-        c.moveToFirst();
-       */
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
     }
@@ -201,5 +192,4 @@ public class DataProvider extends ContentProvider {
         }
         return null;
     }
-
 }

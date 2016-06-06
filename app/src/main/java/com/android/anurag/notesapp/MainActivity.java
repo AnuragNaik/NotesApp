@@ -1,6 +1,5 @@
 package com.android.anurag.notesapp;
 
-import android.app.ActionBar;
 import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -27,11 +26,11 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context context=this;
-        MessagesFragment m= new MessagesFragment();
 
+        Intent ii= new Intent(this, AlertDialog.class );
+       // startActivity(ii);
         context.sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
         context.sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
-
 
         GcmUtil gcmUtil= new GcmUtil(this);
         if(gcmUtil.getRegistrationId(this).equals("")){
@@ -43,7 +42,7 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
         adapter = new SimpleCursorAdapter(this,
                 R.layout.main_list_item,
                 null,
-                new String[]{DataProvider.COL_NAME, DataProvider.COL_COUNT},
+                new String[]{DataProvider.COL_USER_NAME, DataProvider.COL_MSG_COUNT},
                 new int[]{R.id.text1, R.id.text2},
                 0);
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
@@ -64,18 +63,8 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
             }
         });
         setListAdapter(adapter);
-/*
-        Log.i(TAG, "updating data ");
 
-        ContentValues dataToInsert = new ContentValues(1);
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        dataToInsert.put(DataProvider.SENT, timeStamp);
-        String where= "_id=?";
-
-        this.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, "161"), dataToInsert, null, null);
-        Log.i(TAG, "data updated");
-*/
-        ActionBar actionBar = getActionBar();
+        //  ActionBar actionBar = getActionBar();
         //actionBar.setDisplayShowTitleEnabled(true);
         getLoaderManager().initLoader(0, null, this);
     }
@@ -93,7 +82,7 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader loader = new CursorLoader(this,
                 DataProvider.CONTENT_URI_PROFILE,
-                new String[]{DataProvider.COL_ID, DataProvider.COL_NAME, DataProvider.COL_COUNT},
+                new String[]{DataProvider.COL_ID, DataProvider.COL_USER_NAME, DataProvider.COL_MSG_COUNT},
                 null,
                 null,
                DataProvider.COL_ID + " DESC");

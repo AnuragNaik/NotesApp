@@ -173,7 +173,7 @@ public class GcmUtil {
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putString(PROPERTY_CHAT_ID, mobileNumber);
                             editor.apply();
-                           // Toast.makeText(context,"Registered Successfully!", Toast.LENGTH_LONG ).show();
+
                             Intent intnt= new Intent(context, MainActivity.class);
                             intnt.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             context.startActivity(intnt);

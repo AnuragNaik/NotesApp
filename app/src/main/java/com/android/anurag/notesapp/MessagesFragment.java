@@ -72,14 +72,17 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                         LinearLayout root = (LinearLayout) view.getParent().getParent();
                         LinearLayout messageBox = (LinearLayout) view.getParent();
                         TextView messageView=(TextView) messageBox.findViewById(R.id.message_status);
-                        if(cursor.getString(cursor.getColumnIndex(DataProvider.READ))!=null){
+                        if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_READ))!=null){
                             messageView.setText("Read");
                         }
-                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.DELIVERED))!=null){
+                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_DELIVERED))!=null){
                             messageView.setText("Delivered");
                         }
-                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.SENT))!=null){
+                        else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_SENT))!=null){
                            messageView.setText("Sent");
+                        }
+                        else{
+                            messageView.setText("Pending");
                         }
 
                         if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {
@@ -120,10 +123,10 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         Log.d(TAG, "onActivityCreated()");
         Bundle args = new Bundle();
         Log.d(TAG, "onActivityCreated() and mListener.getProfileEmail()=" + mListener.getProfileEmail());
-        args.putString(DataProvider.COL_EMAIL, mListener.getProfileEmail());
+        args.putString(DataProvider.COL_USER_ID, mListener.getProfileEmail());
         getLoaderManager().initLoader(1, args, this);
         Log.d(TAG, "onActivityCreated() finish..");
-        Log.d(TAG, args.getString(DataProvider.COL_EMAIL));
+        Log.d(TAG, args.getString(DataProvider.COL_USER_ID));
 
     }
 
@@ -137,7 +140,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "onCreateLoader(int id, Bundle args)");
-        String eEmail = args.getString(DataProvider.COL_EMAIL);
+        String eEmail = args.getString(DataProvider.COL_USER_ID);
         Log.d(TAG, "eEmail="+eEmail);
         CursorLoader loader = new CursorLoader(
                 getActivity(),
@@ -171,6 +174,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         String getProfileEmail();
     }
 
+
     public void setAsSentInMessageTable(String messageId){
         Log.i(TAG, "updating data ");
 /*
@@ -183,7 +187,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
 
         ContentValues dataToInsert = new ContentValues(1);
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-        dataToInsert.put(DataProvider.SENT, timeStamp);
+        dataToInsert.put(DataProvider.COL_SENT, timeStamp);
         String where= "_id=?";
         String[] whereArgs=new String[] {String.valueOf(messageId)};
         getActivity().getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, messageId), dataToInsert, null, null);

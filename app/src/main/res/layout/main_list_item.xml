@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/chat_background">
+    android:background="#FFF">
 <!--android:background="#f0dcb2"-->
     <ImageView
         android:id="@+id/avatar"
@@ -13,7 +13,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:src="@drawable/ic_contact_picture"
-       />
+        android:baselineAlignBottom="true" />
 
     <TextView
         android:id="@+id/text1"
@@ -24,7 +24,9 @@
         android:layout_toRightOf="@+id/avatar"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#060a22"
-        android:text="Anurag" />
+        android:text="Anurag"
+        android:textStyle="bold"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/text2"

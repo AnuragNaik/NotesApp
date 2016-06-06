@@ -21,22 +21,22 @@ public class DbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
 
         //getting tables  created and initialized
-        String CREATE_MSG_TABLE= "create table messages " +
-                "(_id integer primary key autoincrement," +
-                " msg text," +
-                " email text," +
-                " email2 text," +
-                " at datetime default current_timestamp," +
-                " sent datetime default null," +
-                " delivered datetime default null," +
-                " read datetime default null)" +
+        String CREATE_MSG_TABLE= "create table "+DataProvider.TABLE_MESSAGES +
+                "("+DataProvider.COL_ID + " integer primary key autoincrement," +
+                DataProvider.COL_MSG + " text," +
+                DataProvider.COL_FROM + " text," +
+                DataProvider.COL_TO + " text," +
+                DataProvider.COL_AT + " datetime default current_timestamp," +
+                DataProvider.COL_SENT + " datetime default null," +
+                DataProvider.COL_DELIVERED + " datetime default null," +
+                DataProvider.COL_READ + " datetime default null)" +
                 ";";
 
-        String CREATE_PROFILE_TABLE="create table profile " +
-                "(_id integer primary key autoincrement," +
-                " name text," +
-                " email text unique," +
-                " count integer default 0)" +
+        String CREATE_PROFILE_TABLE="create table " + DataProvider.TABLE_PROFILE +
+                "(" + DataProvider.COL_ID + " integer primary key autoincrement," +
+                DataProvider.COL_USER_NAME + "  text," +
+                DataProvider.COL_USER_ID + " text unique," +
+                DataProvider.COL_MSG_COUNT + " integer default 0)" +
                 ";";
 
         db.execSQL(CREATE_MSG_TABLE);

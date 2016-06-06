@@ -47,15 +47,16 @@ import java.util.Random;
 public final class ServerUtilities {
 
     private static final String TAG = "ServerUtilities";
-
-    private static final int MAX_ATTEMPTS = 10;
+    private static final String BASE_URL="http://notesapp.comxa.com/";
+  //  private static final String BASE_URL="http://athena.nitc.ac.in/anuragkumar_b130974cs/"
+    private static final int MAX_ATTEMPTS = 1;
     private static final int BACKOFF_MILLI_SECONDS = 2000;
     private static final Random random = new Random();
 
-    public String UrlToSendMsg="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/send.php";
-    public String UrlToRegister="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/register.php";
-    public String UrlToUnRegister="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/unregister.php";
-    public String UrlToSendDeliveryReport="http://athena.nitc.ac.in/anuragkumar_b130974cs/notesapp/ack.php";
+    public String UrlToSendMsg=BASE_URL+"notesapp/send.php";
+    public String UrlToRegister=BASE_URL+"notesapp/register.php";
+    public String UrlToUnRegister=BASE_URL+"notesapp/unregister.php";
+    public String UrlToSendDeliveryReport=BASE_URL+"notesapp/ack.php";
     /**
      * Register this account/device pair within the server.
      */
@@ -97,7 +98,7 @@ public final class ServerUtilities {
         }
     }
 
-    public  void send(Context context,String msg, String to, String messageId) throws IOException{
+    public void send(Context context, String msg, String to, String messageId) throws IOException{
         JSONObject post_dict = new JSONObject();
 
         try {
@@ -145,11 +146,12 @@ public final class ServerUtilities {
             String JsonResponse = null;
             String JsonDATA = params[0];
             String Url= params[1];
+
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
             for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-                Log.i(TAG, "Attempt #" + i + " to send");
+                Log.i(TAG, "Attempt #" + i + " to send to "+Url);
                 try {
                     URL url = new URL(Url);
                     urlConnection = (HttpURLConnection) url.openConnection();
@@ -235,7 +237,7 @@ public final class ServerUtilities {
                 Date now = new Date();
                 String strDate = sdfDate.format(now);
                 Log.i(TAG,strDate );
-                dataToInsert.put(DataProvider.SENT, strDate);
+                dataToInsert.put(DataProvider.COL_SENT, strDate);
                 mContext.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, JsonResponse), dataToInsert, null, null);
 
                 Log.i(TAG, "data updated");

@@ -49,8 +49,8 @@ public class AddContactDialog extends DialogFragment {
 
                         try {
                             ContentValues values = new ContentValues(2);
-                            values.put(DataProvider.COL_NAME, email.substring(0, email.indexOf('@')));
-                            values.put(DataProvider.COL_EMAIL, email);
+                            values.put(DataProvider.COL_USER_NAME, email.substring(0, email.indexOf('@')));
+                            values.put(DataProvider.COL_USER_ID, email);
                             ctx.getContentResolver().insert(DataProvider.CONTENT_URI_PROFILE, values);
                         } catch (SQLException sqle) {}
                         alert.dismiss();
