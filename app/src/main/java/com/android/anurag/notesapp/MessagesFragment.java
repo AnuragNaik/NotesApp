@@ -287,7 +287,6 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         getActivity().getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, messageId), dataToInsert, null, null);
         Log.i(TAG, "data updated");
     }
-
 }
 
 /*
