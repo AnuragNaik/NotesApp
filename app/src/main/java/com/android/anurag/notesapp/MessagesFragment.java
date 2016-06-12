@@ -4,50 +4,63 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by anurag on 24/2/16.
  */
-public class MessagesFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>  {
+public class MessagesFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>   {
 
     private DbHelper dbHelper;
     private static SQLiteDatabase db;
     private OnFragmentInteractionListener mListener;
     private SimpleCursorAdapter adapter;
+    private ListView listView;
+    private ListAdapter listAdapter;
     static String TAG= "MessagesFragment";
+    private DbQueries dbQueries;
 
-    @Override
-    public void onAttach(Activity activity) {
+    public SimpleCursorAdapter getAdapter() {
+        return adapter;
+    }
 
-        super.onAttach(activity);
-        Log.d(TAG, "onAttach()");
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
-        }
-        Log.d(TAG, "onAttach() Finished...");
+    public DbQueries getDbQueries() {
+        return dbQueries;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbQueries = new DbQueries(getActivity().getApplicationContext());
         Log.d(TAG, "onCreate()");
         adapter = new SimpleCursorAdapter(
                 getActivity(),
@@ -66,7 +79,6 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
 
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-
                 switch (view.getId()) {
                     case R.id.text1:
                         LinearLayout root = (LinearLayout) view.getParent().getParent();
@@ -103,8 +115,6 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
             }
         });
         setListAdapter(adapter);
-
-        Log.d(TAG, "onCreate() finished...");
     }
 
 	/** To delete or to take any action on a particular message we need to find reference to the message in our database.
@@ -114,8 +124,9 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         Log.i(TAG, "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....");
-      //Toast.makeText(getActivity(), "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....",Toast.LENGTH_LONG ).show();
+        //Toast.makeText(getActivity(), "item selected= " + l.getItemAtPosition(position).toString() + "and id= " + id + "....",Toast.LENGTH_LONG ).show();
     }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -128,6 +139,91 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         Log.d(TAG, "onActivityCreated() finish..");
         Log.d(TAG, args.getString(DataProvider.COL_USER_ID));
 
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        final List list = new ArrayList();
+        listView = this.getListView();
+        listAdapter= getListAdapter();
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // Inflate the menu for the CAB
+                list.clear();
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.chat_context_menu, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                // Here you can perform updates to the CAB due to
+                // an invalidate() request
+                return false;
+            }
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                // Here you can do something when items are selected/de-selected,
+                // such as update the title in the CAB
+                // Capture total checked items
+                final int checkedCount = listView.getCheckedItemCount();
+                mode.setTitle(checkedCount + " Selected");
+                if(checked){
+                    list.add(id);
+                }
+                else{
+                    if(list.contains(id)) {
+                      list.remove(id);
+                    }
+                }
+
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.delete_id:
+                        listView.getSelectedItem();
+                        Toast.makeText(getActivity(), "delete Clicked", Toast.LENGTH_SHORT).show();
+                        for(int i=0; i<list.size(); i++){
+                            dbQueries.deleteMessageByID((list.get(i)).toString());
+                        }
+                        list.clear();
+                        mode.finish(); // Action picked, so close the CAB
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                // Here you can make any necessary updates to the activity when
+                // the CAB is removed. By default, selected items are deselected/unchecked.
+                for(int i=0; i<list.size(); i++){
+                    Log.d(TAG, "id: "+list.get(i));
+                }
+                list.clear();
+            }
+        });
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+
+        super.onAttach(activity);
+        Log.d(TAG, "onAttach()");
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
+        }
+        Log.d(TAG, "onAttach() Finished...");
     }
 
     @Override
@@ -158,10 +254,9 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         adapter.swapCursor(data);
         Log.d(TAG, "onLoadFinished() finish..");
       //  getListView().smoothScrollToPosition(adapter.getCount() - 1); //this will scroll down smoothly
-        ListView l= getListView();
        // l.setSelection(adapter.getCount() - 1);  //setSelection(position) will directly take to the position specified
-        l.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-        l.setStackFromBottom(true);
+        listView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        listView.setStackFromBottom(true);
     }
 
     @Override
@@ -173,7 +268,6 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
     public interface OnFragmentInteractionListener {
         String getProfileEmail();
     }
-
 
     public void setAsSentInMessageTable(String messageId){
         Log.i(TAG, "updating data ");
@@ -193,6 +287,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         getActivity().getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, messageId), dataToInsert, null, null);
         Log.i(TAG, "data updated");
     }
+
 }
 
 /*

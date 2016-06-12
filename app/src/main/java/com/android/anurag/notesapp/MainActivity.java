@@ -73,8 +73,8 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Log.d(TAG, "ListView= " + String.valueOf(l) + " view=" + String.valueOf(v) + " position= " + position + " id= " + String.valueOf(id));
         Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra(Common.PROFILE_ID, String.valueOf(id));
-        Log.d(TAG, "Common.PROFILE_ID= "+String.valueOf(id));
+        intent.putExtra(SendNoteApplication.PROFILE_ID, String.valueOf(id));
+        Log.d(TAG, "SendNoteApplication.PROFILE_ID= "+String.valueOf(id));
         this.startActivity(intent);
     }
 

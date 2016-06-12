@@ -18,7 +18,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.anurag.notesapp.Common;
+import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.DataProvider;
 import com.android.anurag.notesapp.MainActivity;
 import com.android.anurag.notesapp.R;
@@ -53,9 +53,9 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 				
 			} else {
 
-				msg = intent.getStringExtra(Common.MSG);
-				from = intent.getStringExtra(Common.FROM);
-				to = intent.getStringExtra(Common.TO);
+				msg = intent.getStringExtra(SendNoteApplication.MSG);
+				from = intent.getStringExtra(SendNoteApplication.FROM);
+				to = intent.getStringExtra(SendNoteApplication.TO);
 
 
 				Log.i(TAG, "msg= " + msg + "  from=" + from + "..." + " to: " + to + "...");
@@ -67,9 +67,9 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 
 				insertMessageIntoDatabase(msg,from);
 				contactName=from;
-				Log.d(TAG, "current chat= "+ Common.getCurrentChat());
-				if ((!from.equals(Common.getCurrentChat()) &&!to.equals(Common.getCurrentChat()))) {
-					if (Common.isNotify()) {
+				Log.d(TAG, "current chat= "+ SendNoteApplication.getCurrentChat());
+				if ((!from.equals(SendNoteApplication.getCurrentChat()) &&!to.equals(SendNoteApplication.getCurrentChat()))) {
+					if (SendNoteApplication.isNotify()) {
 						sendNotification(contactName + ": " + msg, true);
 					/*	Intent intnt= new Intent(context, PopUp.class);
 						intnt.putExtra("msg", msg);
@@ -178,7 +178,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 						.setSummaryText(/*ctr + */" new Messages"))
                 .setGroup(GROUP_KEY)
                 .setGroupSummary(true)
-                .setSound(Uri.parse(Common.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
+                .setSound(Uri.parse(SendNoteApplication.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
 
 
         //	Random rn= new Random();
@@ -187,8 +187,8 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 	//	mNotificationManager.notify(notificationId, mBuilder.build());
 
 
-		if (!TextUtils.isEmpty(Common.getRingtone())) {
-            mBuilder.setSound(Uri.parse(Common.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
+		if (!TextUtils.isEmpty(SendNoteApplication.getRingtone())) {
+            mBuilder.setSound(Uri.parse(SendNoteApplication.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
 		}
 
 		if (launchApp) {
@@ -209,7 +209,7 @@ public class GcmBroadcastReceiver extends BroadcastReceiver {
 	 */
 	private void incrementMessageCount(Context context, String from, String to) {
 		String chatId;
-		if (!Common.getChatId().equals(to)) {//group
+		if (!SendNoteApplication.getChatId().equals(to)) {//group
 			chatId = to;
 		} else {
 			chatId = from;

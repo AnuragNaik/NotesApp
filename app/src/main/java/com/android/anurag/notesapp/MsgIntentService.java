@@ -1,5 +1,6 @@
 package com.android.anurag.notesapp;
 
+import android.app.Application;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
@@ -27,7 +28,6 @@ public class MsgIntentService extends IntentService {
     private static final String TAG="MsgIntentService";
     private static final String ACTION_SEND_IN_BACKGROUND="action.SEND_IN_BACKGROUND";
     private String MSG_TO, MSG_FROM, MSG, COL_ID;
-
     public MsgIntentService() {
         super("MsgIntentService");
     }
@@ -55,15 +55,11 @@ public class MsgIntentService extends IntentService {
             MSG_TO= cursor.getString(cursor.getColumnIndex(DataProvider.COL_TO));
             COL_ID= cursor.getString(cursor.getColumnIndex(DataProvider.COL_ID));
             ServerUtilities  SU= new ServerUtilities();
-            String k= "k";
             try {
                 SU.send(getApplicationContext(), MSG, MSG_TO, COL_ID);
             }catch (IOException ex){
                 ex.printStackTrace();
             }
-
-          //  chatActivity = new ChatActivity();
-          //  chatActivity.sendFromBackGround(MSG, MSG_TO, COL_ID);
         }
         cursor.close();
     }

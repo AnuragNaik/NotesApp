@@ -27,6 +27,10 @@ public class DataProvider extends ContentProvider {
     public static final String COL_SENT="sent";
     public static final String COL_DELIVERED="delivered";
     public static final String COL_READ="read";
+    public static final String COL_TIMER="timer";
+    public static final String COL_DELIVERED_ACK="delivered_ack";
+    public static final String COL_READ_ACK="read_ack";
+    public static final String COL_THEIR_MSG_ID="their_msg_id";
 
     public static final String TABLE_PROFILE = "profile";
     public static final String COL_USER_NAME = "name";
@@ -48,7 +52,7 @@ public class DataProvider extends ContentProvider {
 
     private static final UriMatcher uriMatcher;
     private DbHelper dbHelper;
-
+    private  SQLiteDatabase db;
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI("com.android.anurag.notesapp.provider", "messages", MESSAGES_ALLROWS);
@@ -59,14 +63,14 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        dbHelper = new DbHelper(getContext());
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-       dbHelper= new DbHelper(getContext());
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db= dbHelper.getReadableDatabase();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
        // Log.d(TAG, "Uri : " + uri + ", projection " + projection.length );
         switch (uriMatcher.match(uri)) {
@@ -97,7 +101,7 @@ public class DataProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         //get writable database first
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db = dbHelper.getWritableDatabase();
         Log.d(TAG, "IUri : " + uri/* + ", projection" + projection[0] + ".. " + "selection= " + selection*/);
         long id;
         switch(uriMatcher.match(uri)) {
@@ -124,8 +128,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        dbHelper= new DbHelper(getContext());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db = dbHelper.getWritableDatabase();
 
         int count;
         switch(uriMatcher.match(uri)) {
@@ -149,8 +152,7 @@ public class DataProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        dbHelper= new DbHelper(getContext());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db = dbHelper.getWritableDatabase();
 
         int count;
         switch(uriMatcher.match(uri)) {

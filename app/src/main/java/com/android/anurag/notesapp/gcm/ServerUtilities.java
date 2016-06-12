@@ -21,7 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.android.anurag.notesapp.Common;
+import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.DataProvider;
 
 import org.json.JSONException;
@@ -69,8 +69,8 @@ public final class ServerUtilities {
         JSONObject post_dict = new JSONObject();
 
         try {
-            post_dict.put(Common.USER_NAME, mobile);
-            post_dict.put(Common.REG_ID, regId);
+            post_dict.put(SendNoteApplication.USER_NAME, mobile);
+            post_dict.put(SendNoteApplication.REG_ID, regId);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -88,7 +88,7 @@ public final class ServerUtilities {
         Log.i(TAG, "unregistering device (mobile = " + mobile + ")");
         JSONObject post_dict = new JSONObject();
         try {
-            post_dict.put(Common.FROM, mobile);
+            post_dict.put(SendNoteApplication.FROM, mobile);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -102,12 +102,12 @@ public final class ServerUtilities {
         JSONObject post_dict = new JSONObject();
 
         try {
-            Log.i(TAG,"chat id= "+Common.getChatId());
-            post_dict.put(Common.TO, to);
-            post_dict.put(Common.FROM, Common.getChatId());
-            post_dict.put(Common.MSG, msg);
-            post_dict.put(Common.MSG_ID, messageId);
-            post_dict.put(Common.ACK,"SENT");
+            Log.i(TAG,"chat id= "+ SendNoteApplication.getChatId());
+            post_dict.put(SendNoteApplication.TO, to);
+            post_dict.put(SendNoteApplication.FROM, SendNoteApplication.getChatId());
+            post_dict.put(SendNoteApplication.MSG, msg);
+            post_dict.put(SendNoteApplication.MSG_ID, messageId);
+            post_dict.put(SendNoteApplication.ACK,"SENT");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -122,9 +122,9 @@ public final class ServerUtilities {
         JSONObject post_dict = new JSONObject();
 
         try {
-            post_dict.put(Common.TO, to);
-            post_dict.put(Common.MSG_ID, messageId);
-            post_dict.put(Common.ACK,"DELIVERY_REPORT");
+            post_dict.put(SendNoteApplication.TO, to);
+            post_dict.put(SendNoteApplication.MSG_ID, messageId);
+            post_dict.put(SendNoteApplication.ACK,"DELIVERY_REPORT");
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,7 @@
 package com.android.anurag.notesapp.gcm;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +13,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.anurag.notesapp.Common;
+import com.android.anurag.notesapp.ChatActivity;
+import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.MainActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -38,6 +40,7 @@ public class GcmUtil {
     private GoogleCloudMessaging gcm;
     private Context context;
     private String regid;
+    private ChatActivity chatActivity;
     
     private AsyncTask registrationTask;
     
@@ -158,7 +161,7 @@ public class GcmUtil {
 	                    if (gcm == null) {
 	                        gcm = GoogleCloudMessaging.getInstance(context);
 	                    }
-	                    regid = gcm.register(Common.getSenderId());
+	                    regid = gcm.register(SendNoteApplication.getSenderId());
 	                    msg = "Device registered, registration ID=" + regid;
                         Log.d(TAG, "Device registered, registration ID=" + regid);
                         // You should send the registration ID to your server over HTTP, so it
@@ -167,7 +170,7 @@ public class GcmUtil {
 
                         if (!TextUtils.isEmpty(chatId)) {
 	                	    storeRegistrationId(context, regid);
-                            Common.setChatId(mobileNumber);
+                            SendNoteApplication.setChatId(mobileNumber);
                            final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                             Log.i(TAG, "Saving ChatId on preference file :" + mobileNumber);
                             SharedPreferences.Editor editor = prefs.edit();

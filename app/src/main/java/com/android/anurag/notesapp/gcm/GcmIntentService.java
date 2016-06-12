@@ -33,15 +33,20 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.anurag.notesapp.AlertDialog;
-import com.android.anurag.notesapp.Common;
+import com.android.anurag.notesapp.DbQueries;
+import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.DataProvider;
 import com.android.anurag.notesapp.MainActivity;
 import com.android.anurag.notesapp.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -64,6 +69,8 @@ public class GcmIntentService extends IntentService {
     private String contactName;
     private String msgId;
     private String ack;
+    private DbQueries dbQueries;
+    private Cursor cursor;
 
     public void setAck(String ack) {
         this.ack = ack;
@@ -113,14 +120,14 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("Deleted messages on server", false);
             } else {
-                setTo(intent.getStringExtra(Common.TO));
-                setMsgId(intent.getStringExtra(Common.MSG_ID));
-                setAck(intent.getStringExtra(Common.ACK));
+                setTo(intent.getStringExtra(SendNoteApplication.TO));
+                setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
+                setAck(intent.getStringExtra(SendNoteApplication.ACK));
                 Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
                 if (ack.equals("SENT")) {
                     //message is received from other client
-                    setMsg(intent.getStringExtra(Common.MSG));
-                    setFrom(intent.getStringExtra(Common.FROM));
+                    setMsg(intent.getStringExtra(SendNoteApplication.MSG));
+                    setFrom(intent.getStringExtra(SendNoteApplication.FROM));
 
                     try {
                         //send delivery report to the client
@@ -145,10 +152,10 @@ public class GcmIntentService extends IntentService {
 
                     insertMessageIntoDatabase(msg, from);
                     setContactName(from);
-                    Log.d(TAG, "current chat= " + Common.getCurrentChat());
-                    if (!(from.equals(Common.getCurrentChat()) && !to.equals(Common.getCurrentChat()))) {
+                    Log.d(TAG, "current chat= " + SendNoteApplication.getCurrentChat());
+                    if (!(from.equals(SendNoteApplication.getCurrentChat()) && !to.equals(SendNoteApplication.getCurrentChat()))) {
 
-                        if (Common.isNotify()) {
+                        if (SendNoteApplication.isNotify()) {
                             sendNotification(contactName + ": " + msg, true);
                             showNotificationPopUp(from, msg);
                             incrementMessageCount(context, from, to);
@@ -186,6 +193,23 @@ public class GcmIntentService extends IntentService {
         startActivity(dialogIntent);
     }
 
+    public ArrayList getNotificationText(){
+        ArrayList list = new ArrayList();
+        cursor = cr.query(
+               DataProvider.CONTENT_URI_MESSAGES,
+               new String[]{DataProvider.COL_FROM, DataProvider.COL_MSG},
+               DataProvider.COL_READ+" is null AND "+DataProvider.COL_FROM+" is not null",
+               null,
+               DataProvider.COL_AT+" ASC");
+        if(cursor != null){
+            while(cursor.moveToNext()){
+                list.add(getContactNameFromContactNumber(cursor.getString(0))+" : "+cursor.getString(1)+"\n");
+            }
+            cursor.close();
+        }
+        return list;
+    }
+
     /**
      * Query Database for contact Availability
      * @param context context variable
@@ -221,7 +245,7 @@ public class GcmIntentService extends IntentService {
      * @param contact contact number to insert into database
      */
     public void insertContactIntoDatabase(Context context, String contact){
-        String name=getContactNameFromConactNumber(contact);
+        String name=getContactNameFromContactNumber(contact);
         try {
             ContentValues values = new ContentValues(2);
             values.put(DataProvider.COL_USER_NAME, name);
@@ -237,7 +261,7 @@ public class GcmIntentService extends IntentService {
      * @param contact : contact to extract name
      * @return display name
      */
-    public String getContactNameFromConactNumber(String contact){
+    public String getContactNameFromContactNumber(String contact){
         return contact.substring(0, contact.indexOf('@'));
     }
 
@@ -258,6 +282,7 @@ public class GcmIntentService extends IntentService {
 
     //	public static int ctr=1;
     private void sendNotification(String text, boolean launchApp) {
+        ArrayList msgList = getNotificationText();
         //	NotificationManagerCompat mNotificationManager = (NotificationManagerCompat) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         Log.i(TAG, "notification");
         String GROUP_KEY="key";
@@ -269,25 +294,28 @@ public class GcmIntentService extends IntentService {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx)
                 .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle(ctx.getString(R.string.app_name))
-                .setStyle(new NotificationCompat.InboxStyle()
-                        .addLine(text)
-                        .setBigContentTitle(/*ctr + */" new Messages")
-                        .setSummaryText(/*ctr + */" new Messages"))
+                .setSmallIcon(R.drawable.send_note)
+                .setContentTitle("New Notes Received")
+                .setContentText("Notes Received")
                 .setGroup(GROUP_KEY)
                 .setGroupSummary(true)
-                .setSound(Uri.parse(Common.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
+                .setSound(Uri.parse(SendNoteApplication.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
+        inboxStyle.setBigContentTitle(msgList.size()+" New Notes");
+        for(int i=0; i<msgList.size(); i++){
+            inboxStyle.addLine(msgList.get(i).toString());
+        }
 
+        mBuilder.setStyle(inboxStyle);
         //	Random rn= new Random();
         //	int notificationId= rn.nextInt();
         int notificationId=1;
         	//mNotificationManager.notify(notificationId, mBuilder.build());
 
 
-        if (!TextUtils.isEmpty(Common.getRingtone())) {
-            mBuilder.setSound(Uri.parse(Common.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
+        if (!TextUtils.isEmpty(SendNoteApplication.getRingtone())) {
+            mBuilder.setSound(Uri.parse(SendNoteApplication.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
         }
 
         if (launchApp) {
@@ -308,7 +336,7 @@ public class GcmIntentService extends IntentService {
      */
     private void incrementMessageCount(Context context, String from, String to) {
         String chatId;
-        if (!Common.getChatId().equals(to)) {//group
+        if (!SendNoteApplication.getChatId().equals(to)) {//group
             chatId = to;
         } else {
             chatId = from;

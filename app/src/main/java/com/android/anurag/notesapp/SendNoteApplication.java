@@ -3,6 +3,7 @@ package com.android.anurag.notesapp;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Application;
+import android.content.ContentResolver;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -14,7 +15,7 @@ import com.android.anurag.notesapp.gcm.GcmUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Common extends Application {
+public class SendNoteApplication extends Application {
 
     public static final String PROFILE_ID = "profile_id";
     public static final String ACTION_REGISTER = "com.android.anurag.notesapp.REGISTER";
@@ -33,6 +34,8 @@ public class Common extends Application {
     private static SharedPreferences prefs;
     public static String CHAT_ID="";
     public static String CURRENT_CHAT_ID="";
+    private ChatActivity chatActivity;
+    private DbQueries dbQueries;
 
     @Override
     public void onCreate() {
@@ -40,6 +43,19 @@ public class Common extends Application {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         List<String> emailList = getEmailList();
         email_arr = emailList.toArray(new String[emailList.size()]);
+        dbQueries = new DbQueries(this);
+    }
+
+    public ChatActivity getChatActivity() {
+        return chatActivity;
+    }
+
+    public void setChatActivity(ChatActivity chatActivity) {
+        this.chatActivity = chatActivity;
+    }
+
+    public DbQueries getDbQueries() {
+        return dbQueries;
     }
 
     private List<String> getEmailList() {
@@ -57,8 +73,7 @@ public class Common extends Application {
         return prefs.getString("chat_email_id", email_arr.length==0 ? "" : email_arr[0]);
     }
 
-    public static String getDisplayName() {
-        String email = getPreferredEmail();
+    public static String getDisplayName(String email) {
         return prefs.getString("display_name", email.substring(0, email.indexOf('@')));
     }
 
@@ -83,8 +98,8 @@ public class Common extends Application {
     }
 
     public static void setChatId(String mobile){
-        String TAG="Common";
-        Common.CHAT_ID=mobile;
+        String TAG="SendNoteApplication";
+        SendNoteApplication.CHAT_ID=mobile;
         Log.i(TAG, "Saving ChatId on preference file :" + mobile);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(GcmUtil.PROPERTY_CHAT_ID, mobile);
@@ -92,11 +107,11 @@ public class Common extends Application {
     }
 
     public static String getCurrentChat(){
-        return Common.CURRENT_CHAT_ID;
+        return SendNoteApplication.CURRENT_CHAT_ID;
     }
 
     public static void setCurrentChat(String currentChat){
-        Common.CURRENT_CHAT_ID= currentChat;
+        SendNoteApplication.CURRENT_CHAT_ID= currentChat;
     }
 
 }
