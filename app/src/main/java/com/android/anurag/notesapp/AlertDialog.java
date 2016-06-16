@@ -39,27 +39,26 @@ public class AlertDialog extends Activity {
         senderName = intent.getStringExtra("sender_name");
         message = intent.getStringExtra("msg");
 
-        createDialogAndTimer(senderName, message).show();
+        createDialogAndTimer(senderName, message);
         timer.start();
     }
 
-    private Dialog createDialogAndTimer(String senderName, String message){
+    private void createDialogAndTimer(String senderName, String message){
         dialog = new Dialog(AlertDialog.this);
         dialog.setContentView(R.layout.alert_dialog);
+        WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
+      //  lp.dimAmount= 0.0f;           //Dont allow dialog background to dim
         dialog.setTitle(senderName);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        //  dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);  //Dont allow user to dismiss dialog using Back Button
+        dialog.show();
+        dialog.setCanceledOnTouchOutside(false);  //Dont allow user to dismiss dialog to dismiss by touching outside window
         timerTextView =(EmojiconTextView) dialog.findViewById(R.id.timer_text_view);
         timer = new CountDownTimerClass(180000, 1000, timerTextView);
-
         msgTextView = (EmojiconTextView) dialog.findViewById(R.id.messageTextView);
         msgTextView.setText(message);
         replyButton = (Button) dialog.findViewById(R.id.button_reply);
         cancelButton = (Button) dialog.findViewById(R.id.button_cancel);
 
-     //   dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-     //   dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-     //   dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         replyEditText = (EmojiconEditText) dialog.findViewById(R.id.replyEditText);
         replyEditText.setOnClickListener(new View.OnClickListener() {
                @Override
@@ -82,7 +81,6 @@ public class AlertDialog extends Activity {
                 cancelClicked();
             }
         });
-        return dialog;
     }
 
     private void replyClicked(){
@@ -91,12 +89,14 @@ public class AlertDialog extends Activity {
         if (!TextUtils.isEmpty(message)) {
             Log.d(TAG, "sender: " + senderName);
             chatActivity.InsertInDatabaseAndSend(message, senderName);
-            dialog.dismiss();
+            this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND); //prevent background to be dim when dialog is cancelled
+            dialog.cancel();
         }
     }
 
     private void cancelClicked(){
         timer.cancel();
-        dialog.dismiss();
+        this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        dialog.cancel();
     }
 }

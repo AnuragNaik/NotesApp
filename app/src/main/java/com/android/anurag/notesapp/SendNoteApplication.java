@@ -3,7 +3,7 @@ package com.android.anurag.notesapp;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Application;
-import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -40,6 +40,8 @@ public class SendNoteApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
+        sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         List<String> emailList = getEmailList();
         email_arr = emailList.toArray(new String[emailList.size()]);

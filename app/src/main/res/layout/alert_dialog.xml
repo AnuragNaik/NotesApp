@@ -34,7 +34,7 @@
             android:paddingLeft="10dp"/>
     </LinearLayout>
 
-    <github.ankushsachdeva.emojicon.EmojiconTextView
+    <github.ankushsachdeva.emojicon.EmojiconEditText
         android:id="@+id/replyEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

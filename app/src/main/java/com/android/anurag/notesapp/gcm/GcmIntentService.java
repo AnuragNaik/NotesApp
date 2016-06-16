@@ -33,20 +33,17 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.anurag.notesapp.AlertDialog;
-import com.android.anurag.notesapp.DbQueries;
-import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.DataProvider;
+import com.android.anurag.notesapp.DbQueries;
 import com.android.anurag.notesapp.MainActivity;
 import com.android.anurag.notesapp.R;
+import com.android.anurag.notesapp.SendNoteApplication;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -71,6 +68,7 @@ public class GcmIntentService extends IntentService {
     private String ack;
     private DbQueries dbQueries;
     private Cursor cursor;
+    SendNoteApplication app;
 
     public void setAck(String ack) {
         this.ack = ack;
@@ -103,10 +101,10 @@ public class GcmIntentService extends IntentService {
     ServerUtilities serverUtilities= new ServerUtilities();
     @Override
     protected void onHandleIntent(Intent intent) {
+        app = (SendNoteApplication) getApplication();
         ctx = this;
         Context context= ctx;
         cr = context.getContentResolver();
-
         PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.acquire();
@@ -186,7 +184,7 @@ public class GcmIntentService extends IntentService {
      * \brief shows notification popup
      */
     public void showNotificationPopUp(String from, String msg){
-        Intent dialogIntent= new Intent(ctx, AlertDialog.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent dialogIntent= new Intent(ctx, AlertDialog.class);
         dialogIntent.putExtra("sender_name", from);
         dialogIntent.putExtra("msg", msg);
         dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

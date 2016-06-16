@@ -27,11 +27,6 @@ public class MainActivity extends ListActivity implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
         Context context=this;
 
-        Intent ii= new Intent(this, AlertDialog.class );
-       // startActivity(ii);
-        context.sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
-        context.sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
-
         GcmUtil gcmUtil= new GcmUtil(this);
         if(gcmUtil.getRegistrationId(this).equals("")){
             Intent i= new Intent(this, RegistrationActivity.class);
