@@ -2,23 +2,18 @@ package com.android.anurag.notesapp;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.anurag.notesapp.gcm.ServerUtilities;
-
-import java.io.IOException;
+import github.ankushsachdeva.emojicon.EmojiconEditText;
+import github.ankushsachdeva.emojicon.EmojiconTextView;
 
 /**
  * Created by anurag on 30/4/16.
@@ -27,12 +22,12 @@ public class AlertDialog extends Activity {
     String TAG = "alertDialog";
     private String senderName, message;
     private Dialog dialog;
-    TextView msgTextView;
-    EditText replyEditText;
+    EmojiconTextView msgTextView;
+    EmojiconEditText replyEditText;
     Button replyButton, cancelButton;
     SendNoteApplication app;
     private ChatActivity chatActivity;
-    private TextView timerTextView;
+    private EmojiconTextView timerTextView;
     private CountDownTimerClass timer;
 
     @Override
@@ -54,26 +49,33 @@ public class AlertDialog extends Activity {
         dialog.setTitle(senderName);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         //  dialog.setCanceledOnTouchOutside(false);
-        timerTextView =(TextView) dialog.findViewById(R.id.timer_text_view);
+        timerTextView =(EmojiconTextView) dialog.findViewById(R.id.timer_text_view);
         timer = new CountDownTimerClass(180000, 1000, timerTextView);
 
-        msgTextView = (TextView) dialog.findViewById(R.id.messageTextView);
+        msgTextView = (EmojiconTextView) dialog.findViewById(R.id.messageTextView);
         msgTextView.setText(message);
         replyButton = (Button) dialog.findViewById(R.id.button_reply);
         cancelButton = (Button) dialog.findViewById(R.id.button_cancel);
 
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        replyEditText = (EditText) dialog.findViewById(R.id.replyEditText);
-
+     //   dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+     //   dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+     //   dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        replyEditText = (EmojiconEditText) dialog.findViewById(R.id.replyEditText);
+        replyEditText.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                   replyEditText.setFocusableInTouchMode(true);
+                   replyEditText.requestFocus();
+                   final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                   inputMethodManager.showSoftInput(replyEditText, InputMethodManager.SHOW_IMPLICIT);
+               }
+        });
         replyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 replyClicked();
             }
         });
-
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

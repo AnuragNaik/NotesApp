@@ -16,12 +16,12 @@
         android:dividerPadding="0dp"
         android:focusable="true"
         android:showDividers="none">
-        <TextView
+        <github.ankushsachdeva.emojicon.EmojiconTextView
             android:id="@+id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/common_google_signin_btn_text_dark_focused"
+            android:textColor="@android:color/background_dark"
             android:textSize="16sp"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -43,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:textSize="9sp"
+            android:layout_gravity="right"
             android:id="@+id/message_status"
             android:textColor="#2a5535"
             android:text="Pending"/>

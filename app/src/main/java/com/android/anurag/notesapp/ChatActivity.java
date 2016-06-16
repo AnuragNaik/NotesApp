@@ -14,20 +14,28 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.android.anurag.notesapp.gcm.GcmUtil;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
+
+import github.ankushsachdeva.emojicon.EmojiconEditText;
+import github.ankushsachdeva.emojicon.EmojiconGridView;
+import github.ankushsachdeva.emojicon.EmojiconsPopup;
+import github.ankushsachdeva.emojicon.emoji.Emojicon;
 
 /**
  * Created by anurag on 24/2/16.
@@ -36,6 +44,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
     private EditText msgEdit;
     private Button sendBtn;
+    private Button pickDateTimeBtn;
     private String profileId, profileName, profileEmail;
     private GcmUtil gcmUtil;
     private ServerUtilities SU;
@@ -67,19 +76,129 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         //got this profile Id (which is just index _id field in DB)  from intent. Since this activity launched by clicking the contact in main activity
         profileId = getIntent().getStringExtra(SendNoteApplication.PROFILE_ID);
         cr= getApplicationContext().getContentResolver();
-        msgEdit = (EditText) findViewById(R.id.msg_edit);//Entered Message
-        sendBtn = (Button) findViewById(R.id.send_btn);    //Send bttn
+      //  msgEdit = (EditText) findViewById(R.id.msg_edit);//Entered Message
+        //  sendBtn = (Button) findViewById(R.id.send_btn);    //Send bttn
+        final EmojiconEditText emojiconEditText = (EmojiconEditText) findViewById(R.id.emojicon_edit_text);
 
-        sendBtn.setOnClickListener(new View.OnClickListener() {    //if Send button clicked
+
+        final View rootView = findViewById(R.id.root_view);
+        final ImageView emojiButton = (ImageView) findViewById(R.id.emoji_btn);
+        final ImageView submitButton = (ImageView) findViewById(R.id.submit_btn);
+
+        // Give the topmost view of your activity layout hierarchy. This will be used to measure soft keyboard height
+        final github.ankushsachdeva.emojicon.EmojiconsPopup popup = new github.ankushsachdeva.emojicon.EmojiconsPopup(rootView, this);
+
+        //Will automatically set size according to the soft keyboard size
+        popup.setSizeForSoftKeyboard();
+
+        //If the emoji popup is dismissed, change emojiButton to smiley icon
+        popup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+
+            @Override
+            public void onDismiss() {
+                changeEmojiKeyboardIcon(emojiButton, R.drawable.smiley);
+            }
+        });
+
+        //If the text keyboard closes, also dismiss the emoji popup
+        popup.setOnSoftKeyboardOpenCloseListener(new EmojiconsPopup.OnSoftKeyboardOpenCloseListener() {
+
+            @Override
+            public void onKeyboardOpen(int keyBoardHeight) {
+
+            }
+
+            @Override
+            public void onKeyboardClose() {
+                if(popup.isShowing())
+                    popup.dismiss();
+            }
+        });
+
+        //On emoji clicked, add it to edittext
+        popup.setOnEmojiconClickedListener(new EmojiconGridView.OnEmojiconClickedListener() {
+
+            @Override
+            public void onEmojiconClicked(Emojicon emojicon) {
+                if (emojiconEditText == null || emojicon == null) {
+                    return;
+                }
+
+                int start = emojiconEditText.getSelectionStart();
+                int end = emojiconEditText.getSelectionEnd();
+                if (start < 0) {
+                    emojiconEditText.append(emojicon.getEmoji());
+                } else {
+                    emojiconEditText.getText().replace(Math.min(start, end),
+                            Math.max(start, end), emojicon.getEmoji(), 0,
+                            emojicon.getEmoji().length());
+                }
+            }
+        });
+
+        //On backspace clicked, emulate the KEYCODE_DEL key event
+        popup.setOnEmojiconBackspaceClickedListener(new EmojiconsPopup.OnEmojiconBackspaceClickedListener() {
+
+            @Override
+            public void onEmojiconBackspaceClicked(View v) {
+                KeyEvent event = new KeyEvent(
+                        0, 0, 0, KeyEvent.KEYCODE_DEL, 0, 0, 0, 0, KeyEvent.KEYCODE_ENDCALL);
+                emojiconEditText.dispatchKeyEvent(event);
+            }
+        });
+
+        // To toggle between text keyboard and emoji keyboard keyboard(Popup)
+        emojiButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                if (!msgEdit.getText().toString().equals("")) {
+
+                //If popup is not showing => emoji keyboard is not visible, we need to show it
+                if(!popup.isShowing()){
+
+                    //If keyboard is visible, simply show the emoji popup
+                    if(popup.isKeyBoardOpen()){
+                        popup.showAtBottom();
+                        changeEmojiKeyboardIcon(emojiButton, R.drawable.ic_action_keyboard);
+                    }
+
+                    //else, open the text keyboard first and immediately after that show the emoji popup
+                    else{
+                        emojiconEditText.setFocusableInTouchMode(true);
+                        emojiconEditText.requestFocus();
+                        popup.showAtBottomPending();
+                        final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.showSoftInput(emojiconEditText, InputMethodManager.SHOW_IMPLICIT);
+                        changeEmojiKeyboardIcon(emojiButton, R.drawable.ic_action_keyboard);
+                    }
+                }
+
+                //If popup is showing, simply dismiss it to show the undelying text keyboard
+                else{
+                    popup.dismiss();
+                }
+            }
+        });
+
+        submitButton.setOnClickListener(new View.OnClickListener() {    //if Send button clicked
+            @Override
+            public void onClick(View v) {
+                if (!emojiconEditText.getText().toString().equals("")) {
                     Log.d(TAG, "Sending msg");
-                    InsertInDatabaseAndSend(msgEdit.getText().toString(), getProfileEmail());            //send the message
-                    msgEdit.setText(null);                        //set the message field null in UI
+                    InsertInDatabaseAndSend(emojiconEditText.getText().toString(), getProfileEmail());            //send the message
+                    emojiconEditText.setText(null);     //set the message field null in UI
                 } else {
                     Toast.makeText(ChatActivity.this, "Type in your message", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        pickDateTimeBtn = (Button) findViewById(R.id.date_time_btn);
+        pickDateTimeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ChatActivity.this, DateTimePickerActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -98,6 +217,10 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         dbQueries.markAsReadInDatabase(profileEmail);
         registerReceiver(registrationStatusReceiver, new IntentFilter(SendNoteApplication.ACTION_REGISTER));
         gcmUtil = new GcmUtil(getApplicationContext());
+    }
+
+    private void changeEmojiKeyboardIcon(ImageView iconToBeChanged, int drawableResourceId){
+        iconToBeChanged.setImageResource(drawableResourceId);
     }
 
     @Override
@@ -134,7 +257,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
                 break;
 
             case R.id.action_delete_chat:
-               final ProgressDialog pd = ProgressDialog.show(this,"Delete chat","Deleting...",true, false);
+                final ProgressDialog pd = ProgressDialog.show(this,"Delete chat","Deleting...",true, false);
                 this.dbQueries.deleteChat(profileEmail);
                 Toast.makeText(this,"chat deleted successfully",Toast.LENGTH_SHORT).show();
                 pd.dismiss();

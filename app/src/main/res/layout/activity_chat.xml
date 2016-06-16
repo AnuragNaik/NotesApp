@@ -1,7 +1,8 @@
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/unnamed"
     android:orientation="vertical"
     android:showDividers="none"
@@ -20,10 +21,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="5dp">
+        android:layout_marginBottom="5dp"
+        android:id="@+id/root_view">
 
-        <EditText
-            android:id="@+id/msg_edit"
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/emoji_btn"
+            android:background="@drawable/smiley"
+            android:layout_gravity="bottom"
+            />
+
+        <github.ankushsachdeva.emojicon.EmojiconEditText
+            android:id="@+id/emojicon_edit_text"
+            emojicon:emojiconSize="28sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -43,16 +54,27 @@
             android:gravity="center_vertical"
             android:layout_marginRight="3dp" />
 
-        <Button
-            android:id="@+id/send_btn"
+        <ImageView
+            android:id="@+id/submit_btn"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:text="@string/send_message"
-            android:background="#449261"
+            android:background="@drawable/ic_action_send_now"
             android:layout_marginRight="4dp"
             android:layout_gravity="bottom"
            />
+
+        <Button
+            android:id="@+id/date_time_btn"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="@string/pick_date"
+            android:background="#449261"
+            android:layout_marginRight="4dp"
+            android:layout_gravity="bottom"
+            />
 
     </LinearLayout>
 

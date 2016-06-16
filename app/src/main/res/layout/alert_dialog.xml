@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <TextView
+        <github.ankushsachdeva.emojicon.EmojiconTextView
             android:text="message_text"
             android:id="@+id/messageTextView"
             android:layout_weight="10"
@@ -23,7 +23,7 @@
             android:layout_gravity="center_horizontal"
             android:inputType="textCapSentences" />
 
-        <TextView
+        <github.ankushsachdeva.emojicon.EmojiconTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/timer_text_view"
@@ -34,7 +34,7 @@
             android:paddingLeft="10dp"/>
     </LinearLayout>
 
-    <EditText
+    <github.ankushsachdeva.emojicon.EmojiconTextView
         android:id="@+id/replyEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
