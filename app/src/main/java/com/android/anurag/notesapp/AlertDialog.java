@@ -2,8 +2,11 @@ package com.android.anurag.notesapp;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,6 +14,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.Toast;
+
+import com.android.anurag.notesapp.gcm.ServerUtilities;
+
+import java.io.IOException;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconTextView;
@@ -20,6 +28,7 @@ import github.ankushsachdeva.emojicon.EmojiconTextView;
  */
 public class AlertDialog extends Activity {
     String TAG = "alertDialog";
+    private ContentResolver cr;
     private String senderName, message;
     private Dialog dialog;
     EmojiconTextView msgTextView;
@@ -86,9 +95,15 @@ public class AlertDialog extends Activity {
     private void replyClicked(){
         timer.cancel();
         message = replyEditText.getText().toString();
+
         if (!TextUtils.isEmpty(message)) {
             Log.d(TAG, "sender: " + senderName);
-            chatActivity.InsertInDatabaseAndSend(message, senderName);
+            if(chatActivity!=null) {
+                chatActivity.InsertInDatabaseAndSend(message, senderName);
+            }
+            else{
+               InsertInDatabaseAndSend(message, senderName);
+            }
             this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND); //prevent background to be dim when dialog is cancelled
             dialog.cancel();
         }
@@ -99,4 +114,41 @@ public class AlertDialog extends Activity {
         this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         dialog.cancel();
     }
+
+
+    public void InsertInDatabaseAndSend(String txt, String to) {
+        String msg = "";
+        try {
+            /**
+             * Insert the message in messages table
+             */
+            ContentValues values = new ContentValues(3);
+            values.put(DataProvider.COL_MSG, txt);
+            values.put(DataProvider.COL_TO, to);
+
+            /**
+             * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id
+             * so we need to fetch lastPathSegment() to get id from resultUri
+             */
+            cr = getContentResolver();
+            Uri resultUri = cr.insert(DataProvider.CONTENT_URI_MESSAGES, values);
+            String id = resultUri.getLastPathSegment();
+            Log.d(TAG, "insertUri= " + resultUri + " ,id= " + id);
+
+            /**
+             * Now sending message Id with payload to track the delivery and status of message
+             */
+
+          ServerUtilities  SU = new ServerUtilities();
+            SU.send(getApplicationContext(), txt, to, id);
+
+        } catch (IOException ex) {
+            msg = "Message could not be sent";
+        }
+        if (!TextUtils.isEmpty(msg)) {
+            Toast.makeText(this, "Unable to send the message", Toast.LENGTH_SHORT);
+        }
+    }
+
+
 }
