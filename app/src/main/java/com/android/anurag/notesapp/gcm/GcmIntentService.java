@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.media.AudioAttributes;
@@ -57,7 +58,6 @@ public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     private NotificationManager mNotificationManager;
     NotificationCompat.Builder builder;
-
     private Context ctx;
     private ContentResolver cr;
     private String msg;
@@ -69,6 +69,7 @@ public class GcmIntentService extends IntentService {
     private DbQueries dbQueries;
     private Cursor cursor;
     SendNoteApplication app;
+    private SharedPreferences sharedPreferences;
 
     public void setAck(String ack) {
         this.ack = ack;
@@ -99,6 +100,7 @@ public class GcmIntentService extends IntentService {
     }
     public static final String TAG = "GCM Demo";
     ServerUtilities serverUtilities= new ServerUtilities();
+
     @Override
     protected void onHandleIntent(Intent intent) {
         app = (SendNoteApplication) getApplication();
@@ -108,6 +110,7 @@ public class GcmIntentService extends IntentService {
         PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.acquire();
+        sharedPreferences = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
 
         try {
             GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
@@ -155,7 +158,9 @@ public class GcmIntentService extends IntentService {
 
                         if (SendNoteApplication.isNotify()) {
                             sendNotification(contactName + ": " + msg, true);
-                            showNotificationPopUp(from, msg);
+                           if(sharedPreferences.getBoolean("IS_NOTE_MODE",false)) {
+                               showNotificationPopUp(from, msg);
+                           }
                             incrementMessageCount(context, from, to);
                         }
                     }
@@ -190,6 +195,8 @@ public class GcmIntentService extends IntentService {
         dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(dialogIntent);
     }
+
+
 
     public ArrayList getNotificationText(){
         ArrayList list = new ArrayList();

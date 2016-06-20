@@ -163,6 +163,11 @@
             android:text="@string/highlight_dates"
             android:checked="false"
             android:visibility="gone"/>
-
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/datetime_submit_btn"
+            android:layout_gravity="center_horizontal"
+            android:text="Submit"/>
     </LinearLayout>
 </ScrollView>

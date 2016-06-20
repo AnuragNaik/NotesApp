@@ -1,5 +1,7 @@
 package com.android.anurag.notesapp;
+
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wdullaer.materialdatetimepicker.Utils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -23,7 +26,8 @@ import java.util.Calendar;
 public class DateTimePickerActivity extends AppCompatActivity implements
         TimePickerDialog.OnTimeSetListener,
         DatePickerDialog.OnDateSetListener{
-
+    private String time;
+    private String date;
     private TextView timeTextView;
     private TextView dateTextView;
     private CheckBox mode24Hours;
@@ -42,12 +46,17 @@ public class DateTimePickerActivity extends AppCompatActivity implements
     private CheckBox limitTimes;
     private CheckBox limitDates;
     private CheckBox highlightDates;
+    private Intent resultIntent;
+    private Button dateTimeSubmitBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.date_time_picker_activity);
-
+        resultIntent = new Intent();
+        dateTimeSubmitBtn =(Button) findViewById(R.id.datetime_submit_btn);
+        date= "";
+        time= "";
         // Find our View instances
         timeTextView = (TextView)findViewById(R.id.time_textview);
         dateTextView = (TextView)findViewById(R.id.date_textview);
@@ -150,6 +159,19 @@ public class DateTimePickerActivity extends AppCompatActivity implements
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
+
+        dateTimeSubmitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!date.equals("") && !time.equals("")){
+                    setResult(1, resultIntent);
+                    finish();
+                }
+                else{
+                    Toast.makeText(DateTimePickerActivity.this, "Select Date And Time", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -167,15 +189,18 @@ public class DateTimePickerActivity extends AppCompatActivity implements
         String hourString = hourOfDay < 10 ? "0"+hourOfDay : ""+hourOfDay;
         String minuteString = minute < 10 ? "0"+minute : ""+minute;
         String secondString = second < 10 ? "0"+second : ""+second;
-        String time = "You picked the following time: "+hourString+"h"+minuteString+"m"+secondString+"s";
+        time = hourString+"h"+minuteString+"m"+secondString+"s";
         timeTextView.setText(time);
+        resultIntent.putExtra("TIME", time);
     }
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        String date = "You picked the following date: "+dayOfMonth+"/"+(++monthOfYear)+"/"+year;
+        date = dayOfMonth+"/"+(++monthOfYear)+"/"+year;
         dateTextView.setText(date);
+        resultIntent.putExtra("DATE",date);
     }
+
 }
 
 

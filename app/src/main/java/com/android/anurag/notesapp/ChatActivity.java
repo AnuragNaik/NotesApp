@@ -198,7 +198,8 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ChatActivity.this, DateTimePickerActivity.class);
-                startActivity(intent);
+                int RequestCode =1;
+                startActivityForResult(intent, RequestCode);
             }
         });
 
@@ -221,6 +222,18 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
     private void changeEmojiKeyboardIcon(ImageView iconToBeChanged, int drawableResourceId){
         iconToBeChanged.setImageResource(drawableResourceId);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            if(data!=null) {
+                String date = data.getStringExtra("DATE");
+                String time = data.getStringExtra("TIME");
+                Log.d(TAG, "date = " + date + "time = " + time);
+            }
+        }
     }
 
     @Override
