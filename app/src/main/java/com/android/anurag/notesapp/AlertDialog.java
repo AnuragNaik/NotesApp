@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconTextView;
@@ -122,9 +124,13 @@ public class AlertDialog extends Activity {
             /**
              * Insert the message in messages table
              */
+            SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
+            Date now = new Date();
+            String strDate = sdfDate.format(now);
             ContentValues values = new ContentValues(3);
             values.put(DataProvider.COL_MSG, txt);
             values.put(DataProvider.COL_TO, to);
+            values.put(DataProvider.COL_AT, strDate);
 
             /**
              * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id

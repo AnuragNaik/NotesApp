@@ -3,7 +3,6 @@ package com.android.anurag.notesapp;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.ContactsContract;
 
 /**
  * Created by anurag on 23/2/16.
@@ -11,7 +10,7 @@ import android.provider.ContactsContract;
 public class DbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "notesapp.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,7 +26,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 DataProvider.COL_MSG + " text," +
                 DataProvider.COL_FROM + " text," +
                 DataProvider.COL_TO + " text," +
-                DataProvider.COL_AT + " datetime default current_timestamp," +
+                DataProvider.COL_AT + " datetime default null," +
                 DataProvider.COL_THEIR_MSG_ID + " integer default null,"+
                 DataProvider.COL_SENT + " datetime default null," +
                 DataProvider.COL_DELIVERED + " datetime default null," +

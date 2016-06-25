@@ -233,7 +233,7 @@ public final class ServerUtilities {
                 Log.i(TAG, "updating data ");
                 ContentValues dataToInsert = new ContentValues(1);
 
-                SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+                SimpleDateFormat sdfDate =new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
                 Date now = new Date();
                 String strDate = sdfDate.format(now);
                 Log.i(TAG,strDate );

@@ -31,6 +31,8 @@ import com.android.anurag.notesapp.gcm.GcmUtil;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconGridView;
@@ -309,7 +311,11 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             /**
              * Insert the message in messages table
              */
-            ContentValues values = new ContentValues(3);
+            SimpleDateFormat sdfDate =new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
+            Date now = new Date();
+            String strDate = sdfDate.format(now);
+            ContentValues values = new ContentValues(4);
+            values.put(DataProvider.COL_AT,strDate);
             values.put(DataProvider.COL_MSG, txt);
             values.put(DataProvider.COL_TO, to);
 

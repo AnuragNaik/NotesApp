@@ -4,15 +4,10 @@ import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -83,18 +78,18 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                     case R.id.text1:
                         LinearLayout root = (LinearLayout) view.getParent().getParent();
                         LinearLayout messageBox = (LinearLayout) view.getParent();
-                        TextView messageView=(TextView) messageBox.findViewById(R.id.message_status);
+                        TextView statusText=(TextView) messageBox.findViewById(R.id.message_status);
                         if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_READ))!=null){
-                            messageView.setText("Read");
+                            statusText.setText("Read");
                         }
                         else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_DELIVERED))!=null){
-                            messageView.setText("Delivered");
+                            statusText.setText("Delivered");
                         }
                         else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_SENT))!=null){
-                           messageView.setText("Sent");
+                           statusText.setText("Sent");
                         }
                         else{
-                            messageView.setText("Pending");
+                            statusText.setText("Pending");
                         }
 
                         if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {
@@ -107,7 +102,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                             root.setGravity(Gravity.LEFT);
                             root.setPadding(10, 10, 50, 10);
                             messageBox.setBackgroundResource(R.drawable.boxleft);
-                            messageView.setText("");
+                            statusText.setText("");
                         }
                         break;
                 }
@@ -280,7 +275,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
   */      Log.i(TAG, "updating data ");
 
         ContentValues dataToInsert = new ContentValues(1);
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+        String timeStamp = new SimpleDateFormat("dd/M/yyyy hh:mm:ss").format(Calendar.getInstance().getTime());
         dataToInsert.put(DataProvider.COL_SENT, timeStamp);
         String where= "_id=?";
         String[] whereArgs=new String[] {String.valueOf(messageId)};

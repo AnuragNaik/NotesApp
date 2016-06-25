@@ -169,7 +169,7 @@ public class GcmIntentService extends IntentService {
                         //Delivery report
                         Log.i(TAG, "delivery Report inserting in database");
                         ContentValues contentValues = new ContentValues(1);
-                        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+                        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
                         Date now = new Date();
                         String strDate = sdfDate.format(now);
                         contentValues.put(DataProvider.COL_DELIVERED, strDate);
@@ -276,11 +276,17 @@ public class GcmIntentService extends IntentService {
      * @param from: sender of message
      */
     public void insertMessageIntoDatabase(String msg, String from){
-        Log.i(TAG,"inserting received msg in databse");
-        ContentValues values = new ContentValues(2);
+        Log.i(TAG,"inserting received msg in database");
+
+        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+
+        ContentValues values = new ContentValues(3);
         values.put(DataProvider.COL_MSG, msg);
         values.put(DataProvider.COL_FROM, from);
         values.put(DataProvider.COL_TO, "");
+        values.put(DataProvider.COL_AT,strDate);
         cr.insert(DataProvider.CONTENT_URI_MESSAGES, values);
         Log.i(TAG, "inserted received msg in database");
     }
