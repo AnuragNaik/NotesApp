@@ -61,8 +61,8 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                 getActivity(),
                 R.layout.chat_list_item,
                 null,
-                new String[]{DataProvider.COL_MSG, DataProvider.COL_AT},
-                new int[]{R.id.text1, R.id.text2},
+                new String[]{DataProvider.COL_MSG},
+                new int[]{R.id.text1},
                 0);
 
 		/**public abstract boolean setViewValue (View view, Cursor cursor, int columnIndex)
@@ -79,6 +79,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                         LinearLayout root = (LinearLayout) view.getParent().getParent();
                         LinearLayout messageBox = (LinearLayout) view.getParent();
                         TextView statusText=(TextView) messageBox.findViewById(R.id.message_status);
+                        TextView timeTextView = (TextView) messageBox.findViewById(R.id.text2);
                         if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_READ))!=null){
                             statusText.setText("Read");
                         }
@@ -102,9 +103,12 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                             root.setGravity(Gravity.LEFT);
                             root.setPadding(10, 10, 50, 10);
                             messageBox.setBackgroundResource(R.drawable.boxleft);
-                            statusText.setText("");
+                            statusText.setVisibility(View.GONE);
                         }
+                        String time = DateTimeUtils.get12HourFormatTime(cursor.getString(cursor.getColumnIndex(DataProvider.COL_AT)));
+                        timeTextView.setText(time);
                         break;
+
                 }
                 return false;
             }

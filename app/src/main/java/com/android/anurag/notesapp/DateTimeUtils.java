@@ -114,6 +114,13 @@ public class DateTimeUtils {
         String strDate = sdfDate.format(now);
         return strDate;
     }
+
+    public static String get12HourFormatTime(String time){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
+        Date date = new Date(time);
+        String changedTime = simpleDateFormat.format(date);
+        return changedTime;
+    }
 }
 
 
