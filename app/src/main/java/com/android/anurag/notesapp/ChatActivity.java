@@ -54,6 +54,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     private SharedPreferences.Editor editor;
     private Menu menu;
     private DbQueries dbQueries;
+    MessagesFragment messagesFragment;
     public static String msgTimeStamp;
     String TAG = "ChatActivity";
 
@@ -78,13 +79,14 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         sharedPreferences = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
         dbQueries = app.getDbQueries();
         msgTimeStamp = null;
+        messagesFragment = (MessagesFragment) getFragmentManager().findFragmentByTag("messageFragment");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
         setContentView(R.layout.activity_chat);
+        init();
         Log.d(TAG, "SendNoteApplication.PROFILE_ID= " + SendNoteApplication.PROFILE_ID);
 
         //got this profile Id (which is just index _id field in DB)  from intent. Since this activity launched by clicking the contact in main activity
@@ -206,6 +208,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
                     InsertInDatabaseAndSend(emojiconEditText.getText().toString(), getProfileEmail(), getMsgTimeStamp());            //send the message
                     emojiconEditText.setText(null);     //set the message field null in UI
                     setMsgTimeStamp(null);
+                    messagesFragment.scrollToBottomInChatList();
                 } else {
                     Toast.makeText(ChatActivity.this, "Type in your message", Toast.LENGTH_SHORT).show();
                 }

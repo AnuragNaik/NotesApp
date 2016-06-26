@@ -13,6 +13,7 @@
     <fragment
         android:id="@+id/msg_list"
         android:name="com.android.anurag.notesapp.MessagesFragment"
+        android:tag="messageFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

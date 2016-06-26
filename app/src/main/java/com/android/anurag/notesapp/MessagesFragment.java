@@ -103,7 +103,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                             root.setGravity(Gravity.LEFT);
                             root.setPadding(10, 10, 50, 10);
                             messageBox.setBackgroundResource(R.drawable.boxleft);
-                            statusText.setVisibility(View.GONE);
+                            statusText.setText("");
                         }
                         String time = DateTimeUtils.get12HourFormatTime(cursor.getString(cursor.getColumnIndex(DataProvider.COL_AT)));
                         timeTextView.setText(time);
@@ -266,6 +266,10 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
 
     public interface OnFragmentInteractionListener {
         String getProfileEmail();
+    }
+
+    public void scrollToBottomInChatList(){
+        listView.setSelection(adapter.getCount()-1);
     }
 
     public void setAsSentInMessageTable(String messageId){
