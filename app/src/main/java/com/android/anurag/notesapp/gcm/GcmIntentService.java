@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.android.anurag.notesapp.AlertDialog;
 import com.android.anurag.notesapp.DataProvider;
+import com.android.anurag.notesapp.DateTimeUtils;
 import com.android.anurag.notesapp.DbQueries;
 import com.android.anurag.notesapp.MainActivity;
 import com.android.anurag.notesapp.R;
@@ -66,10 +67,43 @@ public class GcmIntentService extends IntentService {
     private String contactName;
     private String msgId;
     private String ack;
+    private String timer;
     private DbQueries dbQueries;
     private Cursor cursor;
     SendNoteApplication app;
     private SharedPreferences sharedPreferences;
+
+    public String getTimer() {
+        return timer;
+    }
+
+    public void setTimer(String timer) {
+        this.timer = timer;
+    }
+
+    public String getMsgId() {
+        return msgId;
+    }
+
+    public String getAck() {
+        return ack;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
 
     public void setAck(String ack) {
         this.ack = ack;
@@ -124,6 +158,7 @@ public class GcmIntentService extends IntentService {
                 setTo(intent.getStringExtra(SendNoteApplication.TO));
                 setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
                 setAck(intent.getStringExtra(SendNoteApplication.ACK));
+                setTimer(intent.getStringExtra(SendNoteApplication.TIMER));
                 Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
                 if (ack.equals("SENT")) {
                     //message is received from other client
@@ -151,7 +186,7 @@ public class GcmIntentService extends IntentService {
                         Log.i(TAG, "inserting profile data into database");
                     }
 
-                    insertMessageIntoDatabase(msg, from);
+                    insertMessageIntoDatabase(msg, from, getTimer(),Integer.parseInt(getMsgId()));
                     setContactName(from);
                     Log.d(TAG, "current chat= " + SendNoteApplication.getCurrentChat());
                     if (!(from.equals(SendNoteApplication.getCurrentChat()) && !to.equals(SendNoteApplication.getCurrentChat()))) {
@@ -159,7 +194,7 @@ public class GcmIntentService extends IntentService {
                         if (SendNoteApplication.isNotify()) {
                             sendNotification(contactName + ": " + msg, true);
                            if(sharedPreferences.getBoolean("IS_NOTE_MODE",false)) {
-                               showNotificationPopUp(from, msg);
+                               showNotificationPopUp(from, msg, getTimer());
                            }
                             incrementMessageCount(context, from, to);
                         }
@@ -188,10 +223,11 @@ public class GcmIntentService extends IntentService {
     /**
      * \brief shows notification popup
      */
-    public void showNotificationPopUp(String from, String msg){
+    public void showNotificationPopUp(String from, String msg, String timer){
         Intent dialogIntent= new Intent(ctx, AlertDialog.class);
         dialogIntent.putExtra("sender_name", from);
         dialogIntent.putExtra("msg", msg);
+        dialogIntent.putExtra("timer",timer);
         dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(dialogIntent);
     }
@@ -275,18 +311,18 @@ public class GcmIntentService extends IntentService {
      * @param msg: message to be inserted
      * @param from: sender of message
      */
-    public void insertMessageIntoDatabase(String msg, String from){
+    public void insertMessageIntoDatabase(String msg, String from , String timer, int theirMsgId){
         Log.i(TAG,"inserting received msg in database");
 
-        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-        Date now = new Date();
-        String strDate = sdfDate.format(now);
+        String strDate = DateTimeUtils.getCurrentDateTime();
 
-        ContentValues values = new ContentValues(3);
+        ContentValues values = new ContentValues(6);
         values.put(DataProvider.COL_MSG, msg);
         values.put(DataProvider.COL_FROM, from);
         values.put(DataProvider.COL_TO, "");
         values.put(DataProvider.COL_AT,strDate);
+        values.put(DataProvider.COL_TIMER, timer);
+        values.put(DataProvider.COL_THEIR_MSG_ID, theirMsgId);
         cr.insert(DataProvider.CONTENT_URI_MESSAGES, values);
         Log.i(TAG, "inserted received msg in database");
     }

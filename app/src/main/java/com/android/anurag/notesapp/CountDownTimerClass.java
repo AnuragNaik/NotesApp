@@ -1,5 +1,6 @@
 package com.android.anurag.notesapp;
 
+import android.app.*;
 import android.os.CountDownTimer;
 import android.widget.TextView;
 
@@ -11,10 +12,12 @@ import java.util.concurrent.TimeUnit;
 public class CountDownTimerClass extends CountDownTimer {
 
     private TextView textViewTime;
-    public CountDownTimerClass(long millisInFuture, long countDownInterval, TextView timerTextView ) {
-        super(millisInFuture, countDownInterval);
+    private android.app.Dialog alertDialog;
+    public CountDownTimerClass(DateTimeUtils.Timer timer, long countDownInterval, TextView timerTextView , Dialog dialog) {
+        super(timer.getDifference(), countDownInterval);
         this.textViewTime = timerTextView;
-        timerTextView.setText("03:00:00");
+        timerTextView.setText(timer.getDays()+":"+timer.getHours()+":"+timer.getMinutes()+":"+timer.getSeconds());
+        this.alertDialog= dialog;
         // TODO Auto-generated constructor stub
     }
 
@@ -23,7 +26,9 @@ public class CountDownTimerClass extends CountDownTimer {
         // TODO Auto-generated method stub
 
         long millis = millisUntilFinished;
-        String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+
+        String hms = String.format("%02d:%02d:%02d:%02d", TimeUnit.MILLISECONDS.toDays(millis),
+                TimeUnit.MILLISECONDS.toHours(millis) - TimeUnit.DAYS.toHours(TimeUnit.MILLISECONDS.toDays(millis)) ,
                 TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
                 TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
         System.out.println(hms);
@@ -34,6 +39,7 @@ public class CountDownTimerClass extends CountDownTimer {
     public void onFinish() {
         // TODO Auto-generated method stub
         textViewTime.setText("Completed.");
+        alertDialog.cancel();
     }
 
 }

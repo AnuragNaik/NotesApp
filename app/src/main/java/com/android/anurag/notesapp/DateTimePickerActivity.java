@@ -189,7 +189,7 @@ public class DateTimePickerActivity extends AppCompatActivity implements
         String hourString = hourOfDay < 10 ? "0"+hourOfDay : ""+hourOfDay;
         String minuteString = minute < 10 ? "0"+minute : ""+minute;
         String secondString = second < 10 ? "0"+second : ""+second;
-        time = hourString+"h"+minuteString+"m"+secondString+"s";
+        time = hourString+":"+minuteString+":"+secondString;
         timeTextView.setText(time);
         resultIntent.putExtra("TIME", time);
     }

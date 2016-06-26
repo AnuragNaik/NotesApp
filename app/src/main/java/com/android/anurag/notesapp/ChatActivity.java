@@ -31,8 +31,6 @@ import com.android.anurag.notesapp.gcm.GcmUtil;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconGridView;
@@ -56,9 +54,22 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
     private SharedPreferences.Editor editor;
     private Menu menu;
     private DbQueries dbQueries;
+    public static String msgTimeStamp;
     String TAG = "ChatActivity";
 
     public ChatActivity(){
+    }
+
+    public static void setMsgTimeStamp(String timeStamp){
+        msgTimeStamp = timeStamp;
+    }
+
+    public static boolean isHavingTimer(){
+        return msgTimeStamp!=null;
+    }
+
+    public static String getMsgTimeStamp(){
+        return msgTimeStamp;
     }
 
     public void init(){
@@ -66,6 +77,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         app.setChatActivity(this);
         sharedPreferences = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
         dbQueries = app.getDbQueries();
+        msgTimeStamp = null;
     }
 
     @Override
@@ -186,9 +198,14 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             @Override
             public void onClick(View v) {
                 if (!emojiconEditText.getText().toString().equals("")) {
+                   if(sharedPreferences.getBoolean("IS_NOTE_MODE", false) && !isHavingTimer()){
+                        Toast.makeText(ChatActivity.this, "Set the timer with message!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Log.d(TAG, "Sending msg");
-                    InsertInDatabaseAndSend(emojiconEditText.getText().toString(), getProfileEmail());            //send the message
+                    InsertInDatabaseAndSend(emojiconEditText.getText().toString(), getProfileEmail(), getMsgTimeStamp());            //send the message
                     emojiconEditText.setText(null);     //set the message field null in UI
+                    setMsgTimeStamp(null);
                 } else {
                     Toast.makeText(ChatActivity.this, "Type in your message", Toast.LENGTH_SHORT).show();
                 }
@@ -233,7 +250,9 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
             if(data!=null) {
                 String date = data.getStringExtra("DATE");
                 String time = data.getStringExtra("TIME");
-                Log.d(TAG, "date = " + date + "time = " + time);
+                String timeStamp = "" + date + " " + time;
+                setMsgTimeStamp(timeStamp);
+                Log.d(TAG, "" + date + " " + time);
             }
         }
     }
@@ -305,19 +324,18 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
         }
     }
 
-    public void InsertInDatabaseAndSend(String txt, String to) {
+    public void InsertInDatabaseAndSend(String txt, String to, String timer) {
         String msg = "";
         try {
             /**
              * Insert the message in messages table
              */
-            SimpleDateFormat sdfDate =new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-            Date now = new Date();
-            String strDate = sdfDate.format(now);
+            String strDate =DateTimeUtils.getCurrentDateTime();
             ContentValues values = new ContentValues(4);
             values.put(DataProvider.COL_AT,strDate);
             values.put(DataProvider.COL_MSG, txt);
             values.put(DataProvider.COL_TO, to);
+            values.put(DataProvider.COL_TIMER, timer);
 
             /**
              * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id
@@ -333,7 +351,7 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
              */
 
             SU = new ServerUtilities();
-            SU.send(getApplicationContext(), txt, getProfileEmail(), id);
+            SU.send(getApplicationContext(), txt, getProfileEmail(), id, timer);
 
         } catch (IOException ex) {
             msg = "Message could not be sent";

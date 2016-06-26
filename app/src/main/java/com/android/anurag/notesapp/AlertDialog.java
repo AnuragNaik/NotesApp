@@ -19,8 +19,6 @@ import android.widget.Toast;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconTextView;
@@ -40,6 +38,8 @@ public class AlertDialog extends Activity {
     private ChatActivity chatActivity;
     private EmojiconTextView timerTextView;
     private CountDownTimerClass timer;
+    private String msgTimer;
+    DateTimeUtils.Timer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,7 @@ public class AlertDialog extends Activity {
         Intent intent = getIntent();
         senderName = intent.getStringExtra("sender_name");
         message = intent.getStringExtra("msg");
-
+        msgTimer = intent.getStringExtra("timer");
         createDialogAndTimer(senderName, message);
         timer.start();
     }
@@ -64,7 +64,11 @@ public class AlertDialog extends Activity {
         dialog.show();
         dialog.setCanceledOnTouchOutside(false);  //Dont allow user to dismiss dialog to dismiss by touching outside window
         timerTextView =(EmojiconTextView) dialog.findViewById(R.id.timer_text_view);
-        timer = new CountDownTimerClass(180000, 1000, timerTextView);
+        DateTimeUtils dtu = new DateTimeUtils(DateTimeUtils.getCurrentDateTime(), msgTimer);
+        countDownTimer = dtu.getDifference();
+
+        timer = new CountDownTimerClass(countDownTimer, 1000, timerTextView, dialog);
+
         msgTextView = (EmojiconTextView) dialog.findViewById(R.id.messageTextView);
         msgTextView.setText(message);
         replyButton = (Button) dialog.findViewById(R.id.button_reply);
@@ -101,10 +105,10 @@ public class AlertDialog extends Activity {
         if (!TextUtils.isEmpty(message)) {
             Log.d(TAG, "sender: " + senderName);
             if(chatActivity!=null) {
-                chatActivity.InsertInDatabaseAndSend(message, senderName);
+                chatActivity.InsertInDatabaseAndSend(message, senderName, null);
             }
             else{
-               InsertInDatabaseAndSend(message, senderName);
+               InsertInDatabaseAndSend(message, senderName, null);
             }
             this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND); //prevent background to be dim when dialog is cancelled
             dialog.cancel();
@@ -118,20 +122,18 @@ public class AlertDialog extends Activity {
     }
 
 
-    public void InsertInDatabaseAndSend(String txt, String to) {
+    public void InsertInDatabaseAndSend(String txt, String to, String timer) {
         String msg = "";
         try {
             /**
              * Insert the message in messages table
              */
-            SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-            Date now = new Date();
-            String strDate = sdfDate.format(now);
-            ContentValues values = new ContentValues(3);
+            String strDate = DateTimeUtils.getCurrentDateTime();
+            ContentValues values = new ContentValues(4);
             values.put(DataProvider.COL_MSG, txt);
             values.put(DataProvider.COL_TO, to);
             values.put(DataProvider.COL_AT, strDate);
-
+            values.put(DataProvider.COL_TIMER, timer);
             /**
              * After insertion in Database insert() will return Uri of newly added tuple as base_uri/id
              * so we need to fetch lastPathSegment() to get id from resultUri
@@ -146,7 +148,7 @@ public class AlertDialog extends Activity {
              */
 
           ServerUtilities  SU = new ServerUtilities();
-            SU.send(getApplicationContext(), txt, to, id);
+            SU.send(getApplicationContext(), txt, to, id, timer);
 
         } catch (IOException ex) {
             msg = "Message could not be sent";

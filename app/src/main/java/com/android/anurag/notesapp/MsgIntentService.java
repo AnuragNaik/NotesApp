@@ -1,15 +1,16 @@
 package com.android.anurag.notesapp;
 
-import android.app.Application;
 import android.app.IntentService;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
 import com.android.anurag.notesapp.gcm.ServerUtilities;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,7 +28,7 @@ public class MsgIntentService extends IntentService {
     private SQLiteDatabase db;
     private static final String TAG="MsgIntentService";
     private static final String ACTION_SEND_IN_BACKGROUND="action.SEND_IN_BACKGROUND";
-    private String MSG_TO, MSG_FROM, MSG, COL_ID;
+    private String MSG_TO, MSG_FROM, MSG, COL_ID, MSG_TIMER;
     public MsgIntentService() {
         super("MsgIntentService");
     }
@@ -54,9 +55,10 @@ public class MsgIntentService extends IntentService {
             MSG_FROM= cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM));
             MSG_TO= cursor.getString(cursor.getColumnIndex(DataProvider.COL_TO));
             COL_ID= cursor.getString(cursor.getColumnIndex(DataProvider.COL_ID));
+            MSG_TIMER= cursor.getString(cursor.getColumnIndex(DataProvider.COL_TIMER));
             ServerUtilities  SU= new ServerUtilities();
             try {
-                SU.send(getApplicationContext(), MSG, MSG_TO, COL_ID);
+                SU.send(getApplicationContext(), MSG, MSG_TO, COL_ID, MSG_TIMER );
             }catch (IOException ex){
                 ex.printStackTrace();
             }

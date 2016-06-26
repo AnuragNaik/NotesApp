@@ -98,7 +98,7 @@ public final class ServerUtilities {
         }
     }
 
-    public void send(Context context, String msg, String to, String messageId) throws IOException{
+    public void send(Context context, String msg, String to, String messageId, String timer) throws IOException{
         JSONObject post_dict = new JSONObject();
 
         try {
@@ -107,6 +107,7 @@ public final class ServerUtilities {
             post_dict.put(SendNoteApplication.FROM, SendNoteApplication.getChatId());
             post_dict.put(SendNoteApplication.MSG, msg);
             post_dict.put(SendNoteApplication.MSG_ID, messageId);
+            post_dict.put(SendNoteApplication.TIMER, timer);
             post_dict.put(SendNoteApplication.ACK,"SENT");
         } catch (JSONException e) {
             e.printStackTrace();

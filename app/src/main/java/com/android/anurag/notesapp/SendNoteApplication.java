@@ -29,6 +29,7 @@ public class SendNoteApplication extends Application {
     public static final String USER_NAME="mobile_no";
     public static final String MSG_ID="msg_id";
     public static final String ACK="ack";
+    public static final String TIMER="timer";
 
     public static String[] email_arr;
     private static SharedPreferences prefs;

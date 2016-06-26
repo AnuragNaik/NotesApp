@@ -33,7 +33,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 DataProvider.COL_READ + " datetime default null," +
                 DataProvider.COL_DELIVERED_ACK + " datetime default null,"+
                 DataProvider.COL_READ_ACK + " datetime default null,"+
-                DataProvider.COL_TIMER + " time)" +
+                DataProvider.COL_TIMER + " time default null)" +
                 ";";
 
         String CREATE_PROFILE_TABLE="create table " + DataProvider.TABLE_PROFILE +
