@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/timer_text_view"
             emojicon:emojiconSize="18sp"
-            android:textSize="50sp"
+            android:textSize="20sp"
             android:text="00:00:00"
             android:layout_weight="1"
             android:fontFamily="sans-serif"

@@ -58,10 +58,10 @@ public class DateTimeUtils {
 
     private Date startDate;
     private Date endDate;
-    public DateTimeUtils(String startDateTime, String  endDateTime){
+    public DateTimeUtils(Date startDateTime, String  endDateTime){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");
         try{
-            startDate = simpleDateFormat.parse(startDateTime);
+            startDate = startDateTime;
             endDate = simpleDateFormat.parse(endDateTime);
         } catch (ParseException e){
             e.printStackTrace();
@@ -103,38 +103,13 @@ public class DateTimeUtils {
         return timer;
     }
 
-    public static void main(String arg[]){
-        DateTimeUtils dtu = new DateTimeUtils( "21/06/2016 21:00:00","23/06/2016 10:30:00" );
-        dtu.getDifference();
-    }
-
     public static String getCurrentDateTime(){
-        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm a");//dd/MM/yyyy
+        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss a");//dd/MM/yyyy
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate;
     }
 
-    public static String get12HourFormatTime(String time){
-
-        String Hr = time.split(":")[0];
-        String Min = time.split(":")[1];
-
-        int Hours = Integer.parseInt(Hr);
-        int Minutes = Integer.parseInt(Min);
-
-        if(Hours >= 12 && Hours <=23){
-            return " "+(24-Hours)+":"+Minutes+" PM";
-        }
-        else{
-            if(Hours == 0){
-                return " 12:"+Minutes+" AM";
-            }
-            else{
-                return ""+Hours+":"+Minutes+" AM";
-            }
-        }
-    }
 }
 
 

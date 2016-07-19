@@ -90,7 +90,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                            statusText.setText("S");
                         }
                         else{
-                            statusText.setText("-");
+                            statusText.setText("__");
                         }
 
                         if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {

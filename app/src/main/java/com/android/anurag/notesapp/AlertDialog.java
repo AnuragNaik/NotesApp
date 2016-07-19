@@ -19,6 +19,8 @@ import android.widget.Toast;
 import com.android.anurag.notesapp.gcm.ServerUtilities;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import github.ankushsachdeva.emojicon.EmojiconEditText;
 import github.ankushsachdeva.emojicon.EmojiconTextView;
@@ -64,7 +66,9 @@ public class AlertDialog extends Activity {
         dialog.show();
         dialog.setCanceledOnTouchOutside(false);  //Dont allow user to dismiss dialog to dismiss by touching outside window
         timerTextView =(EmojiconTextView) dialog.findViewById(R.id.timer_text_view);
-        DateTimeUtils dtu = new DateTimeUtils(DateTimeUtils.getCurrentDateTime(), msgTimer);
+        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");//dd/MM/yyyy
+        Date strDate = new Date();
+        DateTimeUtils dtu = new DateTimeUtils(strDate, msgTimer);
         countDownTimer = dtu.getDifference();
 
         timer = new CountDownTimerClass(countDownTimer, 1000, timerTextView, dialog);
