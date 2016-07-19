@@ -81,16 +81,16 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                         TextView statusText=(TextView) messageBox.findViewById(R.id.message_status);
                         TextView timeTextView = (TextView) messageBox.findViewById(R.id.text2);
                         if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_READ))!=null){
-                            statusText.setText("Read");
+                            statusText.setText("R");
                         }
                         else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_DELIVERED))!=null){
-                            statusText.setText("Delivered");
+                            statusText.setText("D");
                         }
                         else if(cursor.getString(cursor.getColumnIndex(DataProvider.COL_SENT))!=null){
-                           statusText.setText("Sent");
+                           statusText.setText("S");
                         }
                         else{
-                            statusText.setText("Pending");
+                            statusText.setText("-");
                         }
 
                         if (cursor.getString(cursor.getColumnIndex(DataProvider.COL_FROM)) == null) {
@@ -103,7 +103,7 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                             root.setGravity(Gravity.LEFT);
                             root.setPadding(10, 10, 50, 10);
                             messageBox.setBackgroundResource(R.drawable.boxleft);
-                            statusText.setText("");
+                            statusText.setText(null);
                         }
                         String time = cursor.getString(cursor.getColumnIndex(DataProvider.COL_AT));
                         time = time.split(" ")[1]+" "+time.split(" ")[2];
