@@ -109,17 +109,31 @@ public class DateTimeUtils {
     }
 
     public static String getCurrentDateTime(){
-        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
+        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm a");//dd/MM/yyyy
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate;
     }
 
     public static String get12HourFormatTime(String time){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
-        Date date = new Date(time);
-        String changedTime = simpleDateFormat.format(date);
-        return changedTime;
+
+        String Hr = time.split(":")[0];
+        String Min = time.split(":")[1];
+
+        int Hours = Integer.parseInt(Hr);
+        int Minutes = Integer.parseInt(Min);
+
+        if(Hours >= 12 && Hours <=23){
+            return " "+(24-Hours)+":"+Minutes+" PM";
+        }
+        else{
+            if(Hours == 0){
+                return " 12:"+Minutes+" AM";
+            }
+            else{
+                return ""+Hours+":"+Minutes+" AM";
+            }
+        }
     }
 }
 

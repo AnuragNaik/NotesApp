@@ -5,9 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Created by anurag on 10/6/16.
  */
@@ -46,9 +43,7 @@ public class DbQueries {
 
     public void markAsReadInDatabase(String profileEmail){
         ContentValues contentValues = new ContentValues(1);
-        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-        Date now = new Date();
-        String strDate = sdfDate.format(now);
+        String strDate = DateTimeUtils.getCurrentDateTime();
         contentValues.put(DataProvider.COL_READ, strDate);
         int c=context.getContentResolver().update(DataProvider.CONTENT_URI_MESSAGES,
                 contentValues,

@@ -105,7 +105,8 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
                             messageBox.setBackgroundResource(R.drawable.boxleft);
                             statusText.setText("");
                         }
-                        String time = DateTimeUtils.get12HourFormatTime(cursor.getString(cursor.getColumnIndex(DataProvider.COL_AT)));
+                        String time = cursor.getString(cursor.getColumnIndex(DataProvider.COL_AT));
+                        time = time.split(" ")[1]+" "+time.split(" ")[2];
                         timeTextView.setText(time);
                         break;
 
@@ -135,7 +136,6 @@ public class MessagesFragment extends ListFragment implements LoaderManager.Load
         Log.d(TAG, "onActivityCreated() and mListener.getProfileEmail()=" + mListener.getProfileEmail());
         args.putString(DataProvider.COL_USER_ID, mListener.getProfileEmail());
         getLoaderManager().initLoader(1, args, this);
-        Log.d(TAG, "onActivityCreated() finish..");
         Log.d(TAG, args.getString(DataProvider.COL_USER_ID));
 
     }

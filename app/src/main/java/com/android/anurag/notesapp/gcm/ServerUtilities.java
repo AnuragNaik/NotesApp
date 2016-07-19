@@ -21,8 +21,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.android.anurag.notesapp.SendNoteApplication;
 import com.android.anurag.notesapp.DataProvider;
+import com.android.anurag.notesapp.DateTimeUtils;
+import com.android.anurag.notesapp.SendNoteApplication;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,8 +37,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 
 
@@ -119,9 +118,8 @@ public final class ServerUtilities {
 
     }
 
-    public void sendDeliveryReport(Context context, String to, String messageId) throws IOException{
+    public void sendDeliveryReport(Context context, String to, String messageId, String strDate) throws IOException{
         JSONObject post_dict = new JSONObject();
-
         try {
             post_dict.put(SendNoteApplication.TO, to);
             post_dict.put(SendNoteApplication.MSG_ID, messageId);
@@ -133,6 +131,10 @@ public final class ServerUtilities {
         if (post_dict.length() > 0) {
             new SendJsonDataToServer(context).execute(String.valueOf(post_dict), UrlToSendDeliveryReport);
         }
+    }
+
+    public void sendReadAckReport(String msgId){
+
     }
 
     static class SendJsonDataToServer extends AsyncTask<String,String,String> {
@@ -233,10 +235,7 @@ public final class ServerUtilities {
             if(!JsonResponse.equals("1")) {
                 Log.i(TAG, "updating data ");
                 ContentValues dataToInsert = new ContentValues(1);
-
-                SimpleDateFormat sdfDate =new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-                Date now = new Date();
-                String strDate = sdfDate.format(now);
+                String strDate = DateTimeUtils.getCurrentDateTime();
                 Log.i(TAG,strDate );
                 dataToInsert.put(DataProvider.COL_SENT, strDate);
                 mContext.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, JsonResponse), dataToInsert, null, null);

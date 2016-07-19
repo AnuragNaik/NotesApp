@@ -36,7 +36,7 @@
 
         <github.ankushsachdeva.emojicon.EmojiconEditText
             android:id="@+id/emojicon_edit_text"
-            emojicon:emojiconSize="28sp"
+            emojicon:emojiconSize="18sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

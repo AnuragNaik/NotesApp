@@ -305,7 +305,13 @@ public class ChatActivity extends FragmentActivity implements MessagesFragment.O
 
     @Override
     public String getProfileEmail() {
-        return profileEmail;
+        return SendNoteApplication.getCurrentChat();
+    }
+
+    @Override
+    public void onBackPressed() {
+        SendNoteApplication.setCurrentChat("");
+        super.onBackPressed();
     }
 
     @Override

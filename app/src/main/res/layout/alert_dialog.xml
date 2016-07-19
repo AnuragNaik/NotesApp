@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -20,6 +21,7 @@
             android:layout_marginRight="4dp"
             android:layout_marginBottom="25dp"
             android:textSize="20sp"
+            emojicon:emojiconSize="18sp"
             android:layout_gravity="center_horizontal"
             android:inputType="textCapSentences" />
 
@@ -27,6 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/timer_text_view"
+            emojicon:emojiconSize="18sp"
             android:textSize="50sp"
             android:text="00:00:00"
             android:layout_weight="1"
@@ -51,6 +54,7 @@
         android:textIsSelectable="true"
         android:inputType="textMultiLine"
         android:allowUndo="true"
+        emojicon:emojiconSize="18sp"
         android:editable="true"
         android:maxLines="5"
         android:focusable="true"

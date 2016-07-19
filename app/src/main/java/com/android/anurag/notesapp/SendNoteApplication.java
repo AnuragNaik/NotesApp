@@ -30,6 +30,7 @@ public class SendNoteApplication extends Application {
     public static final String MSG_ID="msg_id";
     public static final String ACK="ack";
     public static final String TIMER="timer";
+    public static final String READ_ACK_DATE_TIME="readAckDateTime";
 
     public static String[] email_arr;
     private static SharedPreferences prefs;

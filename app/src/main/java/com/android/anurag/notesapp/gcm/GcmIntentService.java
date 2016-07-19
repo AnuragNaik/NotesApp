@@ -43,9 +43,7 @@ import com.android.anurag.notesapp.SendNoteApplication;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -67,6 +65,7 @@ public class GcmIntentService extends IntentService {
     private String contactName;
     private String msgId;
     private String ack;
+    private String readAck;
     private String timer;
     private DbQueries dbQueries;
     private Cursor cursor;
@@ -132,7 +131,7 @@ public class GcmIntentService extends IntentService {
     public GcmIntentService() {
         super("GcmIntentService");
     }
-    public static final String TAG = "GCM Demo";
+    public static final String TAG = "GcmIntentService";
     ServerUtilities serverUtilities= new ServerUtilities();
 
     @Override
@@ -155,32 +154,20 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
                 sendNotification("Deleted messages on server", false);
             } else {
-                setTo(intent.getStringExtra(SendNoteApplication.TO));
-                setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
-                setAck(intent.getStringExtra(SendNoteApplication.ACK));
-                setTimer(intent.getStringExtra(SendNoteApplication.TIMER));
-                Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
+//                setTo(intent.getStringExtra(SendNoteApplication.TO));
+//                setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
+               setAck(intent.getStringExtra(SendNoteApplication.ACK));
+//                setTimer(intent.getStringExtra(SendNoteApplication.TIMER));
                 if (ack.equals("SENT")) {
                     //message is received from other client
                     setMsg(intent.getStringExtra(SendNoteApplication.MSG));
                     setFrom(intent.getStringExtra(SendNoteApplication.FROM));
+                    setTo(intent.getStringExtra(SendNoteApplication.TO));
+                    setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
+                    setTimer(intent.getStringExtra(SendNoteApplication.TIMER));
+                    Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
+                    sendDeliveryReport(ctx, from, msgId);
 
-                    try {
-                        //send delivery report to the client
-                        serverUtilities.sendDeliveryReport(ctx, from, msgId);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    /**
-                    check if contact is already there in your database or not
-                    if(there){
-                        insert message to the contact
-                    }
-                    else{
-                        create new contact and add to database and then add the message
-                    }
-                     */
                     if (getContactIfAvailable(from, context) == null) {
                         insertContactIntoDatabase(context, from);
                         Log.i(TAG, "inserting profile data into database");
@@ -201,22 +188,43 @@ public class GcmIntentService extends IntentService {
                     }
 
                 } else if (ack.equals("DELIVERY_REPORT")) {
-                        //Delivery report
-                        Log.i(TAG, "delivery Report inserting in database");
-                        ContentValues contentValues = new ContentValues(1);
-                        SimpleDateFormat sdfDate = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");//dd/MM/yyyy
-                        Date now = new Date();
-                        String strDate = sdfDate.format(now);
-                        contentValues.put(DataProvider.COL_DELIVERED, strDate);
-                        ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
-                        Log.i(TAG, "Delivery Status updated in database ");
+
+                    //Delivery report
+                    setMsgId(intent.getStringExtra(SendNoteApplication.MSG_ID));
+                    Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
+                    Log.i(TAG, "delivery Report inserting in database");
+                    ContentValues contentValues = new ContentValues(1);
+                    String strDate = DateTimeUtils.getCurrentDateTime();
+                    contentValues.put(DataProvider.COL_DELIVERED, strDate);
+                    ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
+                    Log.i(TAG, "Delivery Status updated in database ");
+
                 } else if (ack.equals("READ")) {
-                    //TODO implement Read ack
+
+                    //Read acknowledgement
+                    Log.i(TAG, "Read Ack inserting in Database");
+                    String msgId = intent.getStringExtra(SendNoteApplication.MSG_ID);
+                    String readAck = intent.getStringExtra(SendNoteApplication.READ_ACK_DATE_TIME);
+                    Log.i(TAG, "ack: " + ack + " msgId: " + msgId + " to: " + to + "...");
+                    ContentValues contentValues = new ContentValues(1);
+                    contentValues.put(DataProvider.COL_READ, readAck);
+                    ctx.getContentResolver().update(Uri.withAppendedPath(DataProvider.CONTENT_URI_MESSAGES, msgId), contentValues, null, null);
+
                 }
             }
         }
         finally{
             mWakeLock.release();
+        }
+    }
+
+    public void sendDeliveryReport(Context ctx, String from, String msgId) {
+        try {
+            String strDate = DateTimeUtils.getCurrentDateTime();
+            //send delivery report to the client
+            serverUtilities.sendDeliveryReport(ctx, from, msgId, strDate);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
