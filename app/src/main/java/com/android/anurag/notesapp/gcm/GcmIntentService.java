@@ -350,14 +350,14 @@ public class GcmIntentService extends IntentService {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(ctx)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.send_note)
-                .setContentTitle("New Notes Received")
-                .setContentText("Notes Received")
+                .setContentTitle("SendNote")
                 .setGroup(GROUP_KEY)
                 .setGroupSummary(true)
                 .setSound(Uri.parse(SendNoteApplication.getRingtone()), AudioAttributes.USAGE_NOTIFICATION);
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
-        inboxStyle.setBigContentTitle(msgList.size()+" New Notes");
+        mBuilder.setContentText(msgList.size()+"new Notes");
+     //   inboxStyle.setBigContentTitle(msgList.size()+" New Notes");
         for(int i=0; i<msgList.size(); i++){
             inboxStyle.addLine(msgList.get(i).toString());
         }
